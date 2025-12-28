@@ -1,6 +1,6 @@
 const express = require('express');
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { requireAuth, requireAdminOrSuper } = require('../middleware/auth');
 const { createStudent, listStudents } = require('../models/students');
 const { createFaculty, listFaculty } = require('../models/faculty');

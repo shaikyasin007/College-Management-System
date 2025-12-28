@@ -1,6 +1,6 @@
 const express = require('express');
 const Joi = require('joi');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { requireAuth, requireSuperAdmin } = require('../middleware/auth');
 const { createAdmin, listAdmins, updateAdmin, setAdminStatus } = require('../models/admin');
 
