@@ -562,7 +562,7 @@
       }
 
       try {
-        const res = await fetch('http://localhost:4001/api/admins', {
+        const res = await fetch('https://college-management-system-s2yf.onrender.com/api/admins', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -595,7 +595,7 @@
       }
     });
 
-    const API = 'http://localhost:4001';
+    const API = 'https://college-management-system-s2yf.onrender.com';
     const authHeader = () => ({ 'Authorization': 'Bearer ' + sessionStorage.getItem('admin_jwt') });
 
     async function apiGet(path){ const r = await fetch(API+path,{ headers: { ...authHeader() } }); return r.json(); }

@@ -56,7 +56,7 @@
     document.getElementById('hdr_name').textContent = studentName;
     document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
 
-    const API='http://localhost:4001';
+    const API='https://college-management-system-s2yf.onrender.com';
     async function loadCourses(){
       try{
         const r = await fetch(API+'/api/student/courses',{headers:{'X-Student-Id':studentId}});

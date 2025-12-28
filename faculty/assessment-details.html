@@ -34,7 +34,7 @@
     </section>
   </main>
   <script>
-    const API='http://localhost:4001'; const fid=sessionStorage.getItem('auth_user_id')||''; if((sessionStorage.getItem('auth_role')||'')!=='faculty'){window.location.href='../login.html'}
+    const API='https://college-management-system-s2yf.onrender.com'; const fid=sessionStorage.getItem('auth_user_id')||''; if((sessionStorage.getItem('auth_role')||'')!=='faculty'){window.location.href='../login.html'}
     const url = new URL(window.location.href); const id = Number(url.searchParams.get('id'));
     function fmt(v){ return v? String(v).replace('T',' ').slice(0,16):'-'; }
     async function load(){

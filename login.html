@@ -118,7 +118,7 @@
       loginBtn.disabled = true; const oldText = loginBtn.textContent; loginBtn.textContent = 'Sending OTP...';
       try {
         // Call backend MFA initiation (password check + OTP issue)
-        const r = await fetch('http://localhost:4001/api/mfa/initiate', {
+        const r = await fetch('https://college-management-system-s2yf.onrender.com/api/mfa/initiate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })

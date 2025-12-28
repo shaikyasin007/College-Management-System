@@ -123,7 +123,7 @@
     document.getElementById('ov_last').textContent = new Date().toLocaleString();
 
     // Fetch real profile from backend filtered by faculty id
-    const API = 'http://localhost:4001';
+    const API = 'https://college-management-system-s2yf.onrender.com';
     async function loadProfile(){
       try{
         const r = await fetch(API+'/api/faculty/me', { headers: { 'X-Faculty-Id': facultyId } });

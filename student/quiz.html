@@ -64,7 +64,7 @@
     const studentId = sessionStorage.getItem('auth_user_id')||''; const studentName = sessionStorage.getItem('auth_name')||'Student';
     document.getElementById('hdr_name').textContent = studentName; document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
 
-    const API='http://localhost:4001';
+    const API='https://college-management-system-s2yf.onrender.com';
     const url = new URL(window.location.href);
     const quizId = Number(url.searchParams.get('id'));
     const quizEl = document.getElementById('quiz');

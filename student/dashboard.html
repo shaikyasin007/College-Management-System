@@ -191,7 +191,7 @@
     document.getElementById('ov_id').textContent = studentId||'—';
     document.getElementById('ov_last').textContent = new Date().toLocaleString();
 
-    const API = 'http://localhost:4001';
+    const API = 'https://college-management-system-s2yf.onrender.com';
     async function loadMe(){
       try{
         const r = await fetch(API+'/api/student/me', { headers: { 'X-Student-Id': studentId } });

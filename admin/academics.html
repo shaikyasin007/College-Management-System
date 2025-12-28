@@ -186,7 +186,7 @@
     const jwt = sessionStorage.getItem('admin_jwt');
     if(!jwt){ window.location.href = 'backend-login.html'; }
 
-    const API = 'http://localhost:4001';
+    const API = 'https://college-management-system-s2yf.onrender.com';
     const authHeader = () => ({ 'Authorization': 'Bearer ' + sessionStorage.getItem('admin_jwt') });
     async function apiGet(path){ const r = await fetch(API+path,{ headers: { ...authHeader() } }); const data = await r.json(); if(!r.ok) { throw new Error(data.error || ('Request failed: '+path)); } return data; }
     async function apiPost(path, body){ const r = await fetch(API+path,{ method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(body) }); const data = await r.json(); if(!r.ok) throw new Error(data.error||'Request failed'); return data; }

@@ -95,7 +95,7 @@
       }
 
       try {
-        const res = await fetch('http://localhost:4001/api/admin/auth/login', {
+        const res = await fetch('https://college-management-system-s2yf.onrender.com/api/admin/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -115,7 +115,7 @@
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
       } catch (ex) {
         console.error(ex);
-        err.textContent = 'Could not reach backend API at http://localhost:4001.';
+        err.textContent = 'Could not reach backend API at https://college-management-system-s2yf.onrender.com.';
         err.style.display = 'block';
       }
     });

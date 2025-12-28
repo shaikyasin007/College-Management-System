@@ -13,12 +13,27 @@ const path = require('path');
 dotenv.config();
 
 const app = express();
-
-// Allow frontend running from file:// or any localhost port during development
-app.use(cors({ origin: true, credentials: false }));
+// CORS: allow GitHub Pages, Render, and localhost during development
+const allowedOrigins = [
+  /https?:\/\/.*\.github\.io$/,
+  'https://college-management-system-s2yf.onrender.com',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:4001',
+  'http://127.0.0.1:4001'
+];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true);
+    const ok = allowedOrigins.some(o => (o instanceof RegExp ? o.test(origin) : o === origin));
+    cb(null, ok);
+  },
+  credentials: false
+}));
 app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, uptime: process.uptime() }));
 
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admins', adminsRoutes);

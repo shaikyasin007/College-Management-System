@@ -92,7 +92,7 @@
     document.getElementById('hdr_name').textContent = studentName;
     document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
 
-    const API='http://localhost:4001';
+    const API='https://college-management-system-s2yf.onrender.com';
     function fmt(dt){ try{ return dt? new Date(dt).toLocaleString(): '—'; }catch{return '—';} }
     function statusOf(a){
       if(a.submission_time){ return (typeof a.submission_marks === 'number') ? 'Evaluated' : 'Submitted'; }

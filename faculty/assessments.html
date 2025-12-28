@@ -76,7 +76,7 @@
     </section>
   </main>
   <script>
-    const API='http://localhost:4001'; const fid=sessionStorage.getItem('auth_user_id')||''; if((sessionStorage.getItem('auth_role')||'')!=='faculty'){window.location.href='../login.html'}
+    const API='https://college-management-system-s2yf.onrender.com'; const fid=sessionStorage.getItem('auth_user_id')||''; if((sessionStorage.getItem('auth_role')||'')!=='faculty'){window.location.href='../login.html'}
     async function loadBase(){ const r=await fetch(API+'/api/faculty/me',{headers:{'X-Faculty-Id':fid}}); const d=await r.json(); const classes=(d.faculty?.classes||[]), courses=(d.faculty?.courses||[]);
       document.getElementById('cls').innerHTML = classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
       document.getElementById('crs').innerHTML = courses.map(c=>`<option value="${c.id}">${c.code||''} ${c.name||''}</option>`).join('');
