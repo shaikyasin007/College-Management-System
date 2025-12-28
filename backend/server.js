@@ -9,6 +9,7 @@ const studentRoutes = require('./routes/student');
 const accountsRoutes = require('./routes/accounts');
 const academicsRoutes = require('./routes/academics');
 const path = require('path');
+const { pool } = require('./db');
 
 dotenv.config();
 
@@ -34,6 +35,15 @@ app.use(express.json());
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.get('/api/health', (_req, res) => res.json({ ok: true, uptime: process.uptime() }));
+app.get('/api/health/db', async (_req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT 1 as ok');
+    res.json({ db: 'connected', result: rows[0] });
+  } catch (err) {
+    console.error('DB health error:', err);
+    res.status(500).json({ db: 'error', error: err.message });
+  }
+});
 
 app.use('/api/admin/auth', adminAuthRoutes);
 app.use('/api/admins', adminsRoutes);
