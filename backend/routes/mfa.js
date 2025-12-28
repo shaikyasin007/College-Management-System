@@ -1,6 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 let nodemailer = null; // Loaded lazily/optionally to avoid hard dependency
 try { nodemailer = require('nodemailer'); } catch(_) { /* fallback to console */ }
 
