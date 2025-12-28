@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin API Login – HIT</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#020617;--bg2:#020617;--hit-blue:#00A8E8;--hit-gold:#FFC300;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:#e5e7eb;
+      background:
+        radial-gradient(1200px 700px at 10% 10%,rgba(0,168,232,.24),transparent),
+        radial-gradient(1000px 600px at 90% 20%,rgba(148,163,184,.2),transparent),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+      overflow:hidden;
+    }
+    .card{
+      position:relative;
+      width:min(420px,92vw);
+      padding:22px 22px 20px;
+      border-radius:16px;
+      background:rgba(15,23,42,.92);
+      border:1px solid rgba(148,163,184,.45);
+      box-shadow:0 18px 40px rgba(15,23,42,.9);
+      backdrop-filter:blur(14px);
+    }
+    h1{margin:0 0 8px;font-size:20px}
+    .sub{margin:0 0 14px;font-size:13px;color:#9ca3af}
+    .field{display:flex;flex-direction:column;font-size:13px;margin-top:10px}
+    .field label{margin-bottom:4px;color:#cbd5f5}
+    .field input{
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.96);
+      color:#e5e7eb;
+      padding:8px 10px;
+      font-size:13px;
+      outline:none;
+    }
+    .field input:focus{
+      border-color:var(--hit-blue);
+      box-shadow:0 0 0 1px rgba(56,189,248,.5);
+    }
+    .hint{font-size:11px;color:#9ca3af;margin-top:4px}
+    .error{margin-top:8px;font-size:13px;color:#fecaca;display:none}
+    .success{margin-top:8px;font-size:13px;color:#bbf7d0;display:none}
+    .links{margin-top:10px;font-size:13px;color:#9ca3af}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Admin API Login</h1>
+    <p class="sub">Sign in with your SUPER_ADMIN email to connect the dashboard to the backend API.</p>
+    <form id="apiLoginForm">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email" value="superadmin@heema.edu" />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="ChangeMe123!" />
+        <div class="hint">Default from database seed: <code>ChangeMe123!</code> (you can change it later).</div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:14px;width:100%">Connect Admin Dashboard</button>
+      <div id="err" class="error"></div>
+      <div id="ok" class="success"></div>
+    </form>
+    <div class="links">
+      After success you will be redirected to the <strong>Admin Console</strong>.
+    </div>
+  </main>
+  <script>
+    const form = document.getElementById('apiLoginForm');
+    const err = document.getElementById('err');
+    const ok = document.getElementById('ok');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      err.style.display = 'none';
+      ok.style.display = 'none';
+
+      if (!email || !password) {
+        err.textContent = 'Enter email and password.';
+        err.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:4001/api/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          err.textContent = data.error || 'Login failed.';
+          err.style.display = 'block';
+          return;
+        }
+        sessionStorage.setItem('admin_jwt', data.token);
+        if (data.admin) {
+          try { sessionStorage.setItem('admin_info', JSON.stringify(data.admin)); } catch(_){}
+        }
+        ok.textContent = 'Connected! Redirecting to Admin Console...';
+        ok.style.display = 'block';
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+      } catch (ex) {
+        console.error(ex);
+        err.textContent = 'Could not reach backend API at http://localhost:4001.';
+        err.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+
+

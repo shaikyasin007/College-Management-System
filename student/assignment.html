@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Submit Assignment – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .muted{color:#94a3b8}
+    textarea{width:100%;min-height:140px;border-radius:12px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);color:#e7e9f3;padding:10px}
+    .btn{padding:.5rem .9rem;border-radius:10px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);color:#cbd5e1;cursor:pointer}
+    .btn.primary{background:#2563eb;border-color:#2563eb;color:#e8eefc}
+    input[type=file]{border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);color:#e7e9f3;padding:8px;border-radius:10px}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px">Submit Assignment</h2>
+      <div id="meta" class="muted">Loading...</div>
+      <div style="margin-top:12px">
+        <label class="muted">Upload file (optional)</label>
+        <div id="drop" style="margin-top:6px;border:2px dashed rgba(148,163,184,.4);border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:rgba(2,6,23,.45)">
+          <div>Drag & drop your file here or click to browse</div>
+          <div class="muted" style="margin-top:4px">Supported: PDF, DOC, DOCX • Max 10MB</div>
+          <div id="chosen" style="margin-top:8px"></div>
+        </div>
+        <input id="file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
+      </div>
+      <div style="margin-top:12px">
+        <label class="muted">Text (optional)</label>
+        <textarea id="text" placeholder="Enter your answer here (optional)"></textarea>
+      </div>
+      <div id="msg" class="muted" style="margin-top:10px"></div>
+      <div id="prog" class="muted" style="margin-top:6px;display:none">Uploading: <span id="pct">0%</span></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn" onclick="window.history.back()">Back</button>
+        <button class="btn primary" id="submitBtn">Submit</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const role = sessionStorage.getItem('auth_role')||''; if(role !== 'student'){ window.location.href = '../login.html'; }
+    const studentId = sessionStorage.getItem('auth_user_id')||''; const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName; document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+    const API='http://localhost:4001';
+    const url = new URL(window.location.href);
+    const assessmentId = Number(url.searchParams.get('id'));
+
+    function fmt(dt){ try{ return dt? new Date(dt).toLocaleString(): '—'; }catch{return '—';} }
+
+    async function loadMeta(){
+      if(!assessmentId){ document.getElementById('meta').textContent='Invalid assessment.'; document.getElementById('submitBtn').disabled=true; return; }
+      try{
+        const r = await fetch(API+`/api/student/assessments`,{headers:{'X-Student-Id':studentId}});
+        const d = await r.json();
+        if(!r.ok){ document.getElementById('meta').textContent=''; return; }
+        const items = d.items||[];
+        const a = items.find(x=> !x.is_quiz && Number(x.id)===assessmentId);
+        if(!a){ document.getElementById('meta').textContent='Assessment not available.'; document.getElementById('submitBtn').disabled=true; return; }
+        document.getElementById('meta').textContent = `${a.course_code||''} ${a.course_name||''} • ${a.type||''} • Start: ${fmt(a.start_at)} • Due: ${fmt(a.due_at)} • Max: ${a.total_marks||0}`;
+      }catch(e){ document.getElementById('meta').textContent=''; }
+    }
+
+    function toBase64(file){
+      return new Promise((resolve,reject)=>{
+        const fr=new FileReader(); fr.onload=()=>resolve(fr.result.split(',')[1]); fr.onerror=reject; fr.readAsDataURL(file);
+      });
+    }
+
+    // Drag & Drop UI
+    const drop = document.getElementById('drop'); const fileInput=document.getElementById('file'); const chosen=document.getElementById('chosen');
+    const allowedExt = ['pdf','doc','docx']; const maxSize = 10*1024*1024;
+    function clearFile(){ fileInput.value=''; chosen.innerHTML=''; }
+    function setFile(f){
+      const ext = (f.name.split('.').pop()||'').toLowerCase();
+      if(!allowedExt.includes(ext)){ document.getElementById('msg').textContent='Invalid file type. Allowed: PDF, DOC, DOCX'; clearFile(); return; }
+      if(f.size>maxSize){ document.getElementById('msg').textContent='File too large. Max 10MB'; clearFile(); return; }
+      chosen.innerHTML = `${f.name} — ${(f.size/1024/1024).toFixed(2)} MB <button class="btn" type="button" id="removeFile" style="margin-left:8px">Remove</button>`;
+      document.getElementById('removeFile').onclick = ()=>{ clearFile(); };
+    }
+    drop.addEventListener('click', ()=> fileInput.click());
+    fileInput.addEventListener('change', ()=>{ if(fileInput.files[0]) setFile(fileInput.files[0]); });
+    drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.style.background='rgba(2,6,23,.6)'; });
+    drop.addEventListener('dragleave', ()=>{ drop.style.background='rgba(2,6,23,.45)'; });
+    drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.style.background='rgba(2,6,23,.45)'; const f=e.dataTransfer.files[0]; if(f){ fileInput.files = e.dataTransfer.files; setFile(f); }});
+
+    function submit(){
+      const text = document.getElementById('text').value.trim();
+      const f = fileInput.files[0]||null;
+      const fd = new FormData();
+      fd.append('assessment_id', String(assessmentId));
+      if(text) fd.append('content_text', text);
+      if(f) fd.append('file', f);
+      const msg=document.getElementById('msg'); const prog=document.getElementById('prog'); const pct=document.getElementById('pct');
+      msg.textContent=''; prog.style.display='none'; pct.textContent='0%';
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', API+'/api/student/submit-file-mp', true);
+      xhr.setRequestHeader('X-Student-Id', studentId);
+      xhr.upload.onprogress = (e)=>{ if(e.lengthComputable){ prog.style.display='block'; pct.textContent = Math.round((e.loaded/e.total)*100)+'%'; } };
+      xhr.onreadystatechange = ()=>{
+        if(xhr.readyState===4){
+          if(xhr.status>=200 && xhr.status<300){
+            alert('Submitted successfully');
+            window.location.href = 'assessments.html';
+          } else {
+            try{ const d=JSON.parse(xhr.responseText); msg.textContent=d.error||'Submission failed'; }catch{ msg.textContent='Submission failed'; }
+          }
+        }
+      };
+      xhr.send(fd);
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', submit);
+    loadMeta();
+  </script>
+</body>
+</html>

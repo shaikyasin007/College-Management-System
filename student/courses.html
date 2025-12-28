@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Courses – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    table.clean{width:100%;border-collapse:separate;border-spacing:0;border:1px solid rgba(148,163,184,.28);border-radius:12px;overflow:hidden}
+    table.clean thead th{background:rgba(15,23,42,.6);color:#cbd5e1;padding:10px;border-bottom:1px solid rgba(148,163,184,.28)}
+    table.clean tbody td{padding:10px;border-bottom:1px solid rgba(148,163,184,.18)}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px">My Courses</h2>
+      <table class="clean">
+        <thead><tr><th>Code</th><th>Course</th><th>Faculty</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="3">Loading...</td></tr></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const role = sessionStorage.getItem('auth_role')||'';
+    if(role !== 'student'){ window.location.href = '../login.html'; }
+    const studentId = sessionStorage.getItem('auth_user_id')||'';
+    const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName;
+    document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+
+    const API='http://localhost:4001';
+    async function loadCourses(){
+      try{
+        const r = await fetch(API+'/api/student/courses',{headers:{'X-Student-Id':studentId}});
+        const d = await r.json();
+        const rows = (d.items||[]).map(c=>`<tr><td>${c.code||''}</td><td>${c.name||''}</td><td>${c.faculty_name||'—'}</td></tr>`).join('');
+        document.getElementById('rows').innerHTML = rows || '<tr><td colspan="3">No courses.</td></tr>';
+      }catch(e){ document.getElementById('rows').innerHTML='<tr><td colspan="3">Failed to load.</td></tr>'; }
+    }
+    loadCourses();
+  </script>
+</body>
+</html>

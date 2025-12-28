@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Console – HIT</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{
+      --bg1:#020617;
+      --bg2:#020617;
+      --hit-blue:#00A8E8;
+      --hit-gold:#FFC300;
+      --line:#1f2937;
+    }
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:#e5e7eb;
+      background:
+        radial-gradient(1400px 800px at 0% 0%,rgba(0,168,232,.24),transparent),
+        radial-gradient(1200px 800px at 100% 0%,rgba(88,28,135,.35),transparent),
+        radial-gradient(1000px 700px at 50% 100%,rgba(16,185,129,.2),transparent),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+      overflow-x:hidden;
+    }
+    .bg{position:fixed;inset:-40px;pointer-events:none;z-index:0}
+    .blob{position:absolute;filter:blur(60px);opacity:.28;border-radius:50%;mix-blend-mode:screen}
+    .b1{width:520px;height:520px;background:#60a5fa;left:-140px;top:-120px;animation:floatA 18s ease-in-out infinite}
+    .b2{width:560px;height:560px;background:#a855f7;right:-180px;top:6%;animation:floatB 20s ease-in-out infinite}
+    .b3{width:520px;height:520px;background:#22c55e;left:28%;bottom:-220px;animation:floatC 24s ease-in-out infinite}
+    @keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(32px,14px)}}
+    @keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(-26px,24px)}}
+    @keyframes floatC{0%,100%{transform:translate(0,0)}50%{transform:translate(18px,-26px)}}
+
+    /* Top nav */
+    .nav{
+      position:relative;
+      z-index:2;
+      background:linear-gradient(90deg,#020617ee,#020617ee);
+      border-bottom:1px solid rgba(15,23,42,.8);
+      box-shadow:0 10px 30px rgba(0,0,0,.7);
+    }
+    .nav-inner{
+      width:min(1180px,96%);
+      margin:0 auto;
+      height:60px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .nav-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-size:14px;
+    }
+    .nav-logo{
+      width:32px;height:32px;border-radius:999px;
+      background:var(--grad);
+      display:grid;place-items:center;
+      border:1px solid rgba(255,255,255,.4);
+      font-size:16px;font-weight:800;
+    }
+    .nav-sub{color:#9ca3af;font-size:12px}
+    .nav-right{
+      display:flex;align-items:center;gap:10px;font-size:13px;color:#cbd5f5;
+    }
+
+    /* Main layout */
+    .wrap{position:relative;z-index:1;width:min(1180px,96%);margin:26px auto 40px}
+    .page-title{font-size:22px;margin:0 0 6px}
+    .page-sub{margin:0 0 18px;color:#9ca3af;font-size:13px}
+
+    .layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.05fr) minmax(0,1.2fr);
+      gap:18px;
+    }
+
+    .card-shell{
+      background:radial-gradient(circle at 0% 0%,rgba(148,163,184,.18),transparent),
+                 radial-gradient(circle at 100% 0%,rgba(56,189,248,.16),transparent),
+                 rgba(15,23,42,.9);
+      border-radius:18px;
+      border:1px solid rgba(148,163,184,.35);
+      box-shadow:0 18px 40px rgba(15,23,42,.8);
+      padding:18px 18px 20px;
+      backdrop-filter:blur(14px);
+    }
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .card-header h2{margin:0;font-size:17px}
+    .card-header small{color:#9ca3af;font-size:12px}
+
+    .profile-meta{font-size:13px;color:#cbd5f5;line-height:1.6;margin-bottom:10px}
+    .profile-meta strong{color:#e5e7eb}
+    .status-pill{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:3px 9px;
+      border-radius:999px;
+      background:rgba(22,163,74,.16);
+      color:#bbf7d0;
+      font-size:11px;
+      border:1px solid rgba(34,197,94,.6);
+    }
+
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-top:12px}
+    .field{display:flex;flex-direction:column;font-size:13px;color:#cbd5f5}
+    .field label{margin-bottom:4px}
+    .field input,.field select{
+      border-radius:10px;
+      border:1px solid rgba(148,163,184,.6);
+      background:rgba(15,23,42,.96);
+      color:#e5e7eb;
+      padding:8px 10px;
+      font-size:13px;
+      outline:none;
+    }
+    .field input:focus,.field select:focus{
+      border-color:var(--hit-blue);
+      box-shadow:0 0 0 1px rgba(56,189,248,.5);
+    }
+    .full{grid-column:1 / -1}
+    .hint{font-size:11px;color:#9ca3af;margin-top:4px}
+
+    .error{margin-top:8px;font-size:13px;color:#fecaca;display:none}
+    .success{margin-top:8px;font-size:13px;color:#bbf7d0;display:none}
+
+    /* Quick action tiles */
+    .actions-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+      margin-bottom:14px;
+    }
+    .action{
+      border-radius:14px;
+      padding:10px 10px 12px;
+      font-size:12px;
+      color:#e5e7eb;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      cursor:pointer;
+      border:1px solid rgba(148,163,184,.35);
+      background:linear-gradient(145deg,rgba(15,23,42,.96),rgba(15,23,42,.9));
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .action span.icon{font-size:18px}
+    .action-title{font-weight:600;font-size:12px}
+    .action:hover{
+      transform:translateY(-2px);
+      border-color:rgba(56,189,248,.7);
+      box-shadow:0 14px 30px rgba(15,23,42,.85);
+    }
+
+    .tag-strip{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      font-size:11px;
+      color:#9ca3af;
+      margin-top:4px;
+    }
+
+    /* Activity list */
+    .activity-list{margin-top:4px;font-size:12px;color:#cbd5f5;max-height:160px;overflow-y:auto}
+    .activity-item{padding:8px 0;border-bottom:1px dashed rgba(55,65,81,.8)}
+    .activity-item:last-child{border-bottom:none}
+    .activity-time{color:#9ca3af;font-size:11px;margin-bottom:2px}
+
+    @media (max-width: 980px){
+      .layout{grid-template-columns:1fr}
+      .actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media (max-width: 640px){
+      .nav-inner{height:auto;padding:8px 0;gap:8px;flex-direction:column;align-items:flex-start}
+      .actions-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+
+  <!-- Top nav bar -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <div class="nav-logo">H</div>
+        <div>
+          <strong>Admin Console</strong>
+          <div class="nav-sub">Manage institute administrators</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <span>Welcome, <strong id="navName"></strong> <span id="navRole" style="opacity:.8"></span></span>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">Admin Console</h1>
+    <p class="page-sub">Profile overview, quick actions, and recent activity for your course management system.</p>
+
+    <section class="layout">
+      <!-- Left: profile + create admin form -->
+      <section class="card-shell">
+        <div class="card-header">
+          <div>
+            <h2>Admin Profile Overview</h2>
+            <small>Current signed‑in admin</small>
+          </div>
+          <span class="status-pill">
+            <span>●</span>
+            Active
+          </span>
+        </div>
+        <div class="profile-meta">
+          <div><strong>Name:</strong> <span id="pName">Dr. Anya Sharma</span> &nbsp; <span style="font-size:11px;opacity:.8" id="pRole">SUPER_ADMIN</span></div>
+          <div><strong>Email:</strong> <span id="pEmail">anya.sharma@university.edu</span></div>
+          <div><strong>Last Login:</strong> <span id="pLast">2024‑10‑26, 09:15 AM</span></div>
+        </div>
+
+        <form id="adminForm" class="form-grid">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input id="name" type="text" placeholder="e.g. Priya Sharma" />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="name@heema.edu" />
+          </div>
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role">
+              <option value="ADMIN">Admin</option>
+              <option value="SUPER_ADMIN">Super Admin</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <input id="location" type="text" placeholder="Hyderabad" />
+          </div>
+          <div class="field full">
+            <label for="address">Address</label>
+            <input id="address" type="text" placeholder="Heema Campus, Hyderabad" />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="Choose strong password" />
+            <div class="hint">Will be securely hashed on the server.</div>
+          </div>
+          <div class="field">
+            <label for="confirm">Confirm password</label>
+            <input id="confirm" type="password" placeholder="Re‑enter password" />
+          </div>
+          <div class="full">
+            <button class="btn btn-primary" type="submit">Create Admin</button>
+            <div class="error" id="err"></div>
+            <div class="success" id="ok"></div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Right: quick action cards + recent activity -->
+      <section class="card-shell">
+        <div class="card-header">
+          <div>
+            <h2>Quick Action Cards</h2>
+            <small>Jump directly to common admin workflows</small>
+          </div>
+        </div>
+        <div class="actions-grid">
+          <div class="action" data-href="accounts.html">
+            <span class="icon">👥</span>
+            <div class="action-title">Create Accounts</div>
+            <div class="tag-strip"><span>Students</span><span>Faculty</span></div>
+          </div>
+          <div class="action" data-href="academics.html">
+            <span class="icon">🏫</span>
+            <div class="action-title">Manage Classes</div>
+            <div class="tag-strip"><span>Sections</span><span>Timetables</span></div>
+          </div>
+          <div class="action" data-href="academics.html">
+            <span class="icon">📚</span>
+            <div class="action-title">Courses & Programs</div>
+            <div class="tag-strip"><span>Catalog</span><span>Seats</span></div>
+          </div>
+          <div class="action">
+            <span class="icon">📝</span>
+            <div class="action-title">Review Submissions</div>
+            <div class="tag-strip"><span>Assignments</span><span>Projects</span></div>
+          </div>
+          <div class="action">
+            <span class="icon">📊</span>
+            <div class="action-title">Attendance Overview</div>
+            <div class="tag-strip"><span>Summary</span></div>
+          </div>
+          <div class="action">
+            <span class="icon">📆</span>
+            <div class="action-title">Schedule & Calendar</div>
+            <div class="tag-strip"><span>Events</span><span>Exams</span></div>
+          </div>
+          <div class="action">
+            <span class="icon">✅</span>
+            <div class="action-title">Assessments Control</div>
+            <div class="tag-strip"><span>Midterms</span><span>End‑sem</span></div>
+          </div>
+          <div class="action">
+            <span class="icon">📈</span>
+            <div class="action-title">Reports & Analytics</div>
+            <div class="tag-strip"><span>Performance</span><span>Usage</span></div>
+          </div>
+        </div>
+
+        <div class="card-header" style="margin-top:6px">
+          <div>
+            <h2 style="font-size:15px">Recent Activity</h2>
+            <small>Latest changes across courses and assessments</small>
+          </div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="activity-time">Oct 26, 10:30 AM</div>
+            <div>Prof. Lee created <strong>“Quantum Physics Midterm”</strong> for B.Tech 3rd year.</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-time">Oct 25, 03:45 PM</div>
+            <div>50 new students enrolled into <strong>CSE – Data Structures</strong>.</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-time">Oct 24, 11:10 AM</div>
+            <div>Attendance report generated for <strong>MBA – Semester 1</strong>.</div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-time">Oct 23, 09:20 AM</div>
+            <div>Admin updated program details for <strong>B.Pharmacy</strong>.</div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section class="card-shell" style="margin-top:18px; display:none">
+      <div class="card-header">
+        <div>
+          <h2>Accounts</h2>
+          <small>Create Students and Faculty</small>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field full"><strong>New Student</strong></div>
+        <div class="field">
+          <label for="stu_name">Full name</label>
+          <input id="stu_name" type="text" />
+        </div>
+        <div class="field">
+          <label for="stu_email">Email</label>
+          <input id="stu_email" type="email" />
+        </div>
+        <div class="field">
+          <label for="stu_phone">Phone</label>
+          <input id="stu_phone" type="text" />
+        </div>
+        <div class="field">
+          <label for="stu_dep">Department</label>
+          <select id="stu_dep"></select>
+        </div>
+        <div class="field">
+          <label for="stu_class">Class</label>
+          <select id="stu_class"></select>
+        </div>
+        <div class="field">
+          <label for="stu_pass">Password</label>
+          <input id="stu_pass" type="password" />
+        </div>
+        <div class="field">
+          <label for="stu_conf">Confirm</label>
+          <input id="stu_conf" type="password" />
+        </div>
+        <div class="full">
+          <button class="btn btn-primary" id="btnCreateStudent" type="button">Create Student</button>
+          <div class="error" id="stu_err"></div>
+          <div class="success" id="stu_ok"></div>
+        </div>
+
+        <div class="field full" style="margin-top:8px"><strong>New Faculty</strong></div>
+        <div class="field">
+          <label for="fac_name">Full name</label>
+          <input id="fac_name" type="text" />
+        </div>
+        <div class="field">
+          <label for="fac_email">Email</label>
+          <input id="fac_email" type="email" />
+        </div>
+        <div class="field">
+          <label for="fac_phone">Phone</label>
+          <input id="fac_phone" type="text" />
+        </div>
+        <div class="field">
+          <label for="fac_dep">Department</label>
+          <select id="fac_dep"></select>
+        </div>
+        <div class="field">
+          <label for="fac_pass">Password</label>
+          <input id="fac_pass" type="password" />
+        </div>
+        <div class="full">
+          <button class="btn btn-primary" id="btnCreateFaculty" type="button">Create Faculty</button>
+          <div class="error" id="fac_err"></div>
+          <div class="success" id="fac_ok"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <button class="btn btn-outline" id="btnRefreshLists" type="button">Refresh Lists</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">
+        <div>
+          <h3 style="margin:6px 0 8px;font-size:14px">Students</h3>
+          <table id="tblStudents" style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr><th align="left">Name</th><th align="left">Email</th><th align="left">Dept</th><th align="left">Class</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div>
+          <h3 style="margin:6px 0 8px;font-size:14px">Faculty</h3>
+          <table id="tblFaculty" style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead><tr><th align="left">Name</th><th align="left">Email</th><th align="left">Dept</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <h3 style="margin:6px 0 8px;font-size:14px">Admins</h3>
+        <table id="tblAdmins" style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr><th align="left">Name</th><th align="left">Email</th><th align="left">Role</th><th align="left">Status</th><th align="left">Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card-shell" style="margin-top:18px; display:none">
+      <div class="card-header">
+        <div>
+          <h2>Academics</h2>
+          <small>Departments, Classes, Courses, Assignments</small>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label for="dep_name">Department</label><input id="dep_name" type="text" placeholder="e.g. CSE" /></div>
+        <div class="field"><button class="btn btn-primary" id="btnCreateDep" type="button" style="margin-top:22px">Create Department</button></div>
+
+        <div class="field"><label for="cls_dep">Class Dept</label><select id="cls_dep"></select></div>
+        <div class="field"><label for="cls_name">Class Name</label><input id="cls_name" type="text" placeholder="CSE-3A" /></div>
+        <div class="field full"><button class="btn btn-primary" id="btnCreateClass" type="button">Create Class</button></div>
+
+        <div class="field"><label for="crs_dep">Course Dept</label><select id="crs_dep"></select></div>
+        <div class="field"><label for="crs_code">Course Code</label><input id="crs_code" type="text" placeholder="CSE201" /></div>
+        <div class="field"><label for="crs_name">Course Name</label><input id="crs_name" type="text" placeholder="Data Structures" /></div>
+        <div class="field"><button class="btn btn-primary" id="btnCreateCourse" type="button" style="margin-top:22px">Create Course</button></div>
+
+        <div class="field full" style="margin-top:8px"><strong>Assignments</strong></div>
+        <div class="field"><label for="ac_class">Class</label><select id="ac_class"></select></div>
+        <div class="field"><label for="ac_course">Course</label><select id="ac_course"></select></div>
+        <div class="field"><button class="btn btn-primary" id="btnAssignClassCourse" type="button" style="margin-top:22px">Assign Course to Class</button></div>
+
+        <div class="field"><label for="af_faculty">Faculty</label><select id="af_faculty"></select></div>
+        <div class="field"><label for="af_course">Course</label><select id="af_course"></select></div>
+        <div class="field"><label for="af_class">Class (optional)</label><select id="af_class"><option value="">—</option></select></div>
+        <div class="field"><button class="btn btn-primary" id="btnAssignFaculty" type="button" style="margin-top:22px">Assign Faculty</button></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px">
+        <div>
+          <h3 style="margin:6px 0 8px;font-size:14px">Departments</h3>
+          <ul id="listDeps" style="margin:0;padding-left:16px;font-size:12px"></ul>
+        </div>
+        <div>
+          <h3 style="margin:6px 0 8px;font-size:14px">Classes</h3>
+          <ul id="listClasses" style="margin:0;padding-left:16px;font-size:12px"></ul>
+        </div>
+        <div>
+          <h3 style="margin:6px 0 8px;font-size:14px">Courses</h3>
+          <ul id="listCourses" style="margin:0;padding-left:16px;font-size:12px"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    // Require backend JWT authentication, not the mock auth
+    const jwt = sessionStorage.getItem('admin_jwt');
+    if (!jwt) {
+      window.location.href = 'backend-login.html';
+    }
+
+    // Populate UI from backend login info if available
+    let name = 'Admin';
+    let role = 'SUPER_ADMIN';
+    let email = 'admin@heema.edu';
+    try {
+      const info = JSON.parse(sessionStorage.getItem('admin_info') || '{}');
+      if (info) {
+        name = info.name || name;
+        role = info.role || role;
+        email = info.email || email;
+      }
+    } catch (_) {}
+
+    document.getElementById('navName').textContent = name;
+    document.getElementById('navRole').textContent = `(${role})`;
+    document.getElementById('pName').textContent = name;
+    document.getElementById('pRole').textContent = role;
+    document.getElementById('pEmail').textContent = email;
+
+    const form = document.getElementById('adminForm');
+    const err = document.getElementById('err');
+    const ok = document.getElementById('ok');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('name').value.trim();
+      const emailVal = document.getElementById('email').value.trim();
+      const phoneVal = document.getElementById('location').value.trim();
+      const addressVal = document.getElementById('address').value.trim();
+      const roleVal = document.getElementById('role').value;
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+
+      err.style.display = 'none';
+      ok.style.display = 'none';
+
+      if (!fullName || !emailVal || !password || !confirm) {
+        err.textContent = 'Please fill all required fields.';
+        err.style.display = 'block';
+        return;
+      }
+      if (password.length < 8) {
+        err.textContent = 'Password must be at least 8 characters long.';
+        err.style.display = 'block';
+        return;
+      }
+      if (password !== confirm) {
+        err.textContent = 'Passwords do not match.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const token = sessionStorage.getItem('admin_jwt');
+      if (!token) {
+        err.textContent = 'Not authenticated with backend. Please log in via the admin API first.';
+        err.style.display = 'block';
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:4001/api/admins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token,
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email: emailVal,
+            phone: phoneVal || null,
+            address: addressVal || null,
+            password,
+            role: roleVal,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          err.textContent = data.error || 'Failed to create admin.';
+          err.style.display = 'block';
+          return;
+        }
+
+        ok.textContent = 'Admin created successfully in the database.';
+        ok.style.display = 'block';
+        form.reset();
+      } catch (ex) {
+        console.error(ex);
+        err.textContent = 'Network error while calling admin API.';
+        err.style.display = 'block';
+      }
+    });
+
+    const API = 'http://localhost:4001';
+    const authHeader = () => ({ 'Authorization': 'Bearer ' + sessionStorage.getItem('admin_jwt') });
+
+    async function apiGet(path){ const r = await fetch(API+path,{ headers: { ...authHeader() } }); return r.json(); }
+    async function apiPost(path, body){ const r = await fetch(API+path,{ method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(body) }); const data = await r.json(); if(!r.ok) throw new Error(data.error||'Request failed'); return data; }
+    async function apiPut(path, body){ const r = await fetch(API+path,{ method:'PUT', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(body) }); const data = await r.json(); if(!r.ok) throw new Error(data.error||'Request failed'); return data; }
+
+    const el = (id)=>document.getElementById(id);
+
+    async function loadDeps(){ const { departments } = await apiGet('/api/academics/departments');
+      const opts = departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+      el('stu_dep').innerHTML = '<option value="">—</option>'+opts;
+      el('fac_dep').innerHTML = '<option value="">—</option>'+opts;
+      el('cls_dep').innerHTML = opts;
+      el('crs_dep').innerHTML = opts;
+      el('listDeps').innerHTML = departments.map(d=>`<li>${d.name}</li>`).join('');
+    }
+
+    async function loadClasses(){ const depId = el('cls_dep').value || ''; const q = depId ? ('?department_id='+depId) : '';
+      const { classes } = await apiGet('/api/academics/classes'+q);
+      const opts = classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      el('stu_class').innerHTML = '<option value="">—</option>'+opts;
+      el('ac_class').innerHTML = opts;
+      el('af_class').innerHTML = '<option value="">—</option>'+opts;
+      el('listClasses').innerHTML = classes.map(c=>`<li>${c.name}</li>`).join('');
+    }
+
+    async function loadCourses(){ const depId = el('crs_dep').value || ''; const q = depId ? ('?department_id='+depId) : '';
+      const { courses } = await apiGet('/api/academics/courses'+q);
+      const opts = courses.map(c=>`<option value="${c.id}">${c.code} – ${c.name}</option>`).join('');
+      el('ac_course').innerHTML = opts;
+      el('af_course').innerHTML = opts;
+      el('listCourses').innerHTML = courses.map(c=>`<li>${c.code} – ${c.name}</li>`).join('');
+    }
+
+    async function loadFaculty(){ const { faculty } = await apiGet('/api/accounts/faculty');
+      el('af_faculty').innerHTML = faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+      const rows = faculty.map(f=>`<tr><td>${f.name}</td><td>${f.email}</td><td>${f.department_id||''}</td></tr>`).join('');
+      el('tblFaculty').querySelector('tbody').innerHTML = rows;
+    }
+
+    async function loadStudents(){ const { students } = await apiGet('/api/accounts/students');
+      const rows = students.map(s=>`<tr><td>${s.name}</td><td>${s.email}</td><td>${s.department_id||''}</td><td>${s.class_id||''}</td></tr>`).join('');
+      el('tblStudents').querySelector('tbody').innerHTML = rows;
+    }
+
+    async function loadAdmins(){ try {
+      const res = await fetch(API + '/api/admins', { headers: { ...authHeader() } });
+      const data = await res.json();
+      if(!res.ok){ throw new Error(data.error||'Failed to load admins'); }
+      const rows = (data.admins||[]).map(a=>{
+        const next = a.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+        return `<tr><td>${a.name}</td><td>${a.email}</td><td>${a.role}</td><td>${a.status}</td><td><button data-admin-act data-id="${a.id}" data-next="${next}" class="btn btn-outline" style="padding:4px 8px;font-size:11px">Set ${next}</button></td></tr>`;
+      }).join('');
+      el('tblAdmins').querySelector('tbody').innerHTML = rows;
+      el('tblAdmins').querySelectorAll('[data-admin-act]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          try { await apiPost('/api/admins/' + btn.getAttribute('data-id') + '/status', { status: btn.getAttribute('data-next') }); await loadAdmins(); } catch(e){ alert(e.message); }
+        });
+      });
+    } catch(e){ el('tblAdmins').querySelector('tbody').innerHTML = `<tr><td colspan="5">${e.message}</td></tr>`; } }
+
+    el('btnCreateDep').addEventListener('click', async ()=>{
+      try { await apiPost('/api/academics/departments', { name: el('dep_name').value.trim() }); await loadDeps(); el('dep_name').value=''; } catch(e){ alert(e.message); }
+    });
+    el('cls_dep').addEventListener('change', loadClasses);
+    el('btnCreateClass').addEventListener('click', async ()=>{
+      try { await apiPost('/api/academics/classes', { department_id: Number(el('cls_dep').value), name: el('cls_name').value.trim() }); await loadClasses(); el('cls_name').value=''; } catch(e){ alert(e.message); }
+    });
+    el('crs_dep').addEventListener('change', loadCourses);
+    el('btnCreateCourse').addEventListener('click', async ()=>{
+      try { await apiPost('/api/academics/courses', { department_id: Number(el('crs_dep').value), code: el('crs_code').value.trim(), name: el('crs_name').value.trim() }); await loadCourses(); el('crs_code').value=''; el('crs_name').value=''; } catch(e){ alert(e.message); }
+    });
+    el('btnAssignClassCourse').addEventListener('click', async ()=>{
+      try { await apiPost('/api/academics/class-courses', { class_id: Number(el('ac_class').value), course_id: Number(el('ac_course').value) }); alert('Assigned'); } catch(e){ alert(e.message); }
+    });
+    el('btnAssignFaculty').addEventListener('click', async ()=>{
+      try { await apiPost('/api/academics/faculty-assignments', { faculty_id: Number(el('af_faculty').value), course_id: Number(el('af_course').value), class_id: el('af_class').value ? Number(el('af_class').value) : null }); alert('Assigned'); } catch(e){ alert(e.message); }
+    });
+
+    el('btnCreateStudent').addEventListener('click', async ()=>{
+      el('stu_err').style.display='none'; el('stu_ok').style.display='none';
+      const name = el('stu_name').value.trim(); const email = el('stu_email').value.trim(); const phone = el('stu_phone').value.trim(); const department_id = el('stu_dep').value?Number(el('stu_dep').value):null; const class_id = el('stu_class').value?Number(el('stu_class').value):null; const pass = el('stu_pass').value; const conf = el('stu_conf').value;
+      if(!name||!email||!pass||!conf){ el('stu_err').textContent='Fill required fields'; el('stu_err').style.display='block'; return; }
+      if(pass!==conf){ el('stu_err').textContent='Passwords do not match'; el('stu_err').style.display='block'; return; }
+      try { await apiPost('/api/accounts/students', { name, email, phone: phone||null, department_id, class_id, password: pass }); el('stu_ok').textContent='Student created'; el('stu_ok').style.display='block'; el('stu_name').value=el('stu_email').value=el('stu_phone').value=el('stu_pass').value=el('stu_conf').value=''; await loadStudents(); }
+      catch(e){ const msg = (e.message||'').includes('already in use') ? 'Email or phone already exists. Each user must have a unique account.' : e.message; el('stu_err').textContent=msg; el('stu_err').style.display='block'; }
+    });
+
+    el('btnCreateFaculty').addEventListener('click', async ()=>{
+      el('fac_err').style.display='none'; el('fac_ok').style.display='none';
+      const name = el('fac_name').value.trim(); const email = el('fac_email').value.trim(); const phone = el('fac_phone').value.trim(); const department_id = el('fac_dep').value?Number(el('fac_dep').value):null; const pass = el('fac_pass').value;
+      if(!name||!email||!pass){ el('fac_err').textContent='Fill required fields'; el('fac_err').style.display='block'; return; }
+      try { await apiPost('/api/accounts/faculty', { name, email, phone: phone||null, department_id, password: pass }); el('fac_ok').textContent='Faculty created'; el('fac_ok').style.display='block'; el('fac_name').value=el('fac_email').value=el('fac_phone').value=el('fac_pass').value=''; await loadFaculty(); }
+      catch(e){ const msg = (e.message||'').includes('already in use') ? 'Email or phone already exists. Each user must have a unique account.' : e.message; el('fac_err').textContent=msg; el('fac_err').style.display='block'; }
+    });
+
+    el('btnRefreshLists').addEventListener('click', async ()=>{ await loadStudents(); await loadFaculty(); await loadAdmins(); });
+
+    (async ()=>{
+      await loadDeps();
+      await loadClasses();
+      await loadCourses();
+      await loadFaculty();
+      await loadStudents();
+      await loadAdmins();
+    })();
+
+    // Navigate from quick action cards to dedicated pages
+    document.querySelectorAll('.action[data-href]').forEach(card=>{
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', ()=>{
+        const href = card.getAttribute('data-href');
+        if(href) window.location.href = href;
+      });
+    });
+  </script>
+</body>
+</html>
+
+

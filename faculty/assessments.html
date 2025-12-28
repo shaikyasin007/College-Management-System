@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Assessments – Faculty Console</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    main{padding-top:76px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    @media (max-width: 980px){ .grid-3{grid-template-columns:1fr 1fr} }
+    @media (max-width: 640px){ .grid-3{grid-template-columns:1fr} }
+    .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+    .form-grid .field input,.form-grid .field select,.form-grid .field textarea{border-radius:12px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.96);padding:10px 12px;width:100%}
+    .data-table{width:100%;border-collapse:separate;border-spacing:0 6px}
+    .data-table thead th{font-weight:600;color:#cbd5f5;font-size:12px;padding:8px 10px;border-bottom:1px solid rgba(148,163,184,.25)}
+    .data-table tbody td{font-size:12px;color:#e5e7eb;padding:8px 10px;background:rgba(2,6,23,.45)}
+    .back{color:#9fb0c5}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left"><strong>Heema Institute of Technology</strong><div class="nav-sub">Faculty Console</div></div>
+      <div class="nav-right"><a class="btn btn-outline" href="dashboard.html">← Back to Dashboard</a><button class="btn btn-outline" onclick="Auth.logout()">Logout</button></div>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 6px">Manage Assessments</h2>
+      <small class="back">Create and manage assessments for your assigned classes/courses</small>
+      <div class="form-grid" style="margin-top:12px">
+        <div class="field"><label>Class</label><select id="cls"></select></div>
+        <div class="field"><label>Course</label><select id="crs"></select></div>
+        <div class="field"><label>Type</label><select id="typ"><option>Assignment</option><option>Quiz</option><option>Exam</option><option>Project</option></select></div>
+        <div class="field"><label>Total Marks</label><input id="marks" type="number" min="0" step="1" placeholder="100"/></div>
+        <div class="field"><label>Start At</label><input id="startAt" type="datetime-local"/></div>
+        <div class="field"><label>Due At</label><input id="dueAt" type="datetime-local"/></div>
+        <div class="field"><label>Instructions</label><textarea id="inst" rows="2" placeholder="Short instructions"></textarea></div>
+        <div class="field"><button id="create" class="btn btn-primary" type="button">Create Assessment</button></div>
+        <div id="msg" class="error" style="display:none"></div>
+      </div>
+
+      <div id="quizBuilder" class="card" style="margin-top:12px; display:none">
+        <h3 style="margin:0 0 8px">Create Quiz</h3>
+        <div class="form-grid">
+          <div class="field"><label>Quiz Title</label><input id="qz_title" type="text" placeholder="Quiz title"/></div>
+          <div class="field"><label>Start Date</label><input id="qz_start" type="datetime-local"/></div>
+          <div class="field"><label>End Date</label><input id="qz_end" type="datetime-local"/></div>
+          <div class="field span-3"><label>Quiz Instructions</label><textarea id="qz_inst" rows="2" placeholder="Shown to students"></textarea></div>
+        </div>
+        <div id="questions"></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-outline" id="addQ" type="button">+ Add Question</button>
+          <button class="btn btn-primary" id="saveQuiz" type="button">Publish Quiz</button>
+        </div>
+        <div id="qz_msg" class="error" style="display:none;margin-top:8px"></div>
+      </div>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 style="margin:0 0 8px">Your Assessments</h3>
+      <table class="data-table" id="tbl"><thead><tr><th align="left">Type</th><th align="left">Class</th><th align="left">Course</th><th align="left">Marks</th><th align="left">Due</th><th align="left">Actions</th></tr></thead><tbody></tbody></table>
+    </section>
+    <section class="card" style="margin-top:16px">
+      <h3 style="margin:0 0 8px">Your Quizzes</h3>
+      <table class="data-table" id="tblQ"><thead><tr><th align="left">Title</th><th align="left">Class</th><th align="left">Course</th><th align="left">Questions</th><th align="left">Marks</th><th align="left">Start</th><th align="left">End</th></tr></thead><tbody></tbody></table>
+    </section>
+  </main>
+  <script>
+    const API='http://localhost:4001'; const fid=sessionStorage.getItem('auth_user_id')||''; if((sessionStorage.getItem('auth_role')||'')!=='faculty'){window.location.href='../login.html'}
+    async function loadBase(){ const r=await fetch(API+'/api/faculty/me',{headers:{'X-Faculty-Id':fid}}); const d=await r.json(); const classes=(d.faculty?.classes||[]), courses=(d.faculty?.courses||[]);
+      document.getElementById('cls').innerHTML = classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('crs').innerHTML = courses.map(c=>`<option value="${c.id}">${c.code||''} ${c.name||''}</option>`).join('');
+    }
+    function renderAssessments(items){
+      const tbody=document.querySelector('#tbl tbody');
+      if(!items || items.length===0){
+        tbody.innerHTML = `<tr><td colspan="6" style="color:#9fb0c5">No assessments yet.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(a=>{
+        const type=a.type||'-', cls=a.class_name||'-', crs=(a.course_code?`${a.course_code} `:'')+(a.course_name||'-');
+        const marks=a.total_marks??'-';
+        const due=a.due_at?String(a.due_at).replace('T',' ').slice(0,16):(a.due_date||'-');
+        const start=a.start_at?String(a.start_at).replace('T',' ').slice(0,16):'-';
+        return `<tr><td>${type}</td><td>${cls}</td><td>${crs}</td><td>${marks}</td><td>${start} → ${due}</td><td><button class="btn btn-outline view-btn" data-id="${a.id}">View</button></td></tr>`;
+      }).join('');
+    }
+    async function loadAssessments(){
+      try{
+        const r=await fetch(API+'/api/faculty/assessments',{headers:{'X-Faculty-Id':fid}});
+        const d=await r.json();
+        renderAssessments(d.items||[]);
+      }catch(e){
+        document.querySelector('#tbl tbody').innerHTML = `<tr><td colspan="6" style="color:#ef4444">Failed to load assessments</td></tr>`;
+      }
+    }
+    function renderQuizzes(items){ const tbody=document.querySelector('#tblQ tbody'); if(!items||!items.length){ tbody.innerHTML=`<tr><td colspan="7" style="color:#9fb0c5">No quizzes yet.</td></tr>`; return;} tbody.innerHTML=items.map(q=>`<tr><td>${q.title}</td><td>${q.class_name}</td><td>${q.course_code||''} ${q.course_name||''}</td><td>${q.questions_count||0}</td><td>${q.total_marks||''}</td><td>${q.start_at?String(q.start_at).replace('T',' ').slice(0,16):'-'}</td><td>${q.end_at?String(q.end_at).replace('T',' ').slice(0,16):'-'}</td></tr>`).join(''); }
+    async function loadQuizzes(){ try{ const r=await fetch(API+'/api/faculty/quizzes',{headers:{'X-Faculty-Id':fid}}); const d=await r.json(); renderQuizzes(d.items||[]);}catch(e){ const tbody=document.querySelector('#tblQ tbody'); tbody.innerHTML=`<tr><td colspan="7" style="color:#ef4444">Failed to load quizzes</td></tr>`; } }
+    function show(el, cond){ el.style.display = cond? 'block':'none'; }
+    function onTypeChange(){ const typ=document.getElementById('typ').value; const qb=document.getElementById('quizBuilder'); show(qb, typ==='Quiz'); }
+    document.getElementById('typ').addEventListener('change', onTypeChange);
+
+    function makeQuestionCard(idx, data){
+      const q=document.createElement('div'); q.className='card'; q.style.marginTop='10px'; q.dataset.index=idx;
+      q.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><strong>Question ${idx}</strong><button class="btn btn-outline" type="button">Remove</button></div>
+        <div class="form-grid" style="margin-top:10px">
+          <div class="field span-2"><label>Question Text</label><input type="text" class="q-text" placeholder="Enter question" value="${data?.text||''}"></div>
+          <div class="field"><label>Marks</label><input type="number" class="q-marks" min="1" step="1" value="${data?.marks||1}"></div>
+        </div>
+        <div class="opts"></div>
+        <div style="margin-top:8px"><button class="btn btn-outline addOpt" type="button">+ Add Option</button></div>`;
+      const removeBtn=q.querySelector('button.btn.btn-outline');
+      removeBtn.addEventListener('click',()=>{ q.remove(); renumberQuestions();});
+      const opts=q.querySelector('.opts');
+      function addOption(text='', correct=false){
+        const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.gap='8px'; row.style.marginTop='6px';
+        row.innerHTML=`<input type="radio" name="correct_${idx}" ${correct?'checked':''}>
+                       <input type="text" class="opt-text" placeholder="Option text" style="flex:1" value="${text}">
+                       <button class="btn btn-outline" type="button">Remove</button>`;
+        row.querySelector('button').addEventListener('click',()=>row.remove());
+        opts.appendChild(row);
+      }
+      (data?.options||[{text:'Option 1',is_correct:true},{text:'Option 2',is_correct:false}]).forEach((o,i)=>addOption(o.text, !!o.is_correct));
+      q.querySelector('.addOpt').addEventListener('click',()=>addOption('',false));
+      return q;
+    }
+    function renumberQuestions(){ [...document.querySelectorAll('#questions .card')].forEach((el,i)=>{ el.dataset.index=i+1; el.querySelector('strong').textContent=`Question ${i+1}`; el.querySelectorAll('input[type=radio]').forEach(r=> r.name=`correct_${i+1}` ); }); }
+    document.getElementById('addQ').addEventListener('click',()=>{ const idx=document.querySelectorAll('#questions .card').length+1; document.getElementById('questions').appendChild(makeQuestionCard(idx)); });
+
+    function collectQuiz(){
+      const cls=Number(document.getElementById('cls').value), crs=Number(document.getElementById('crs').value);
+      const title=document.getElementById('qz_title').value.trim();
+      const instructions=document.getElementById('qz_inst').value.trim();
+      const start_at=document.getElementById('qz_start').value?new Date(document.getElementById('qz_start').value).toISOString():null;
+      const end_at=document.getElementById('qz_end').value?new Date(document.getElementById('qz_end').value).toISOString():null;
+      const total_marks=Number(document.getElementById('marks').value||0);
+      const cards=[...document.querySelectorAll('#questions .card')];
+      const questions=cards.map((c,i)=>{
+        const text=c.querySelector('.q-text').value.trim();
+        const marks=Number(c.querySelector('.q-marks').value||0);
+        const rows=[...c.querySelectorAll('.opts > div')];
+        const options=rows.map(r=>({ text:r.querySelector('.opt-text').value.trim(), is_correct:r.querySelector('input[type=radio]').checked }));
+        return { text, marks, options };
+      });
+      return { class_id:cls, course_id:crs, title, instructions, total_marks, start_at, end_at, questions };
+    }
+    async function saveQuiz(){
+      const payload=collectQuiz();
+      const m=document.getElementById('qz_msg'); m.style.display='none'; m.textContent='';
+      if(!payload.title){ m.textContent='Quiz title is required'; m.style.display='block'; return; }
+      if(!payload.questions.length){ m.textContent='Add at least one question'; m.style.display='block'; return; }
+      try{
+        const r=await fetch(API+'/api/faculty/quizzes',{method:'POST',headers:{'Content-Type':'application/json','X-Faculty-Id':fid},body:JSON.stringify(payload)});
+        const d=await r.json();
+        if(!r.ok){ m.textContent=d.error||'Failed to publish quiz'; m.style.display='block'; return; }
+        m.style.display='none';
+        document.getElementById('questions').innerHTML='';
+        document.getElementById('qz_title').value=''; document.getElementById('qz_inst').value=''; document.getElementById('qz_start').value=''; document.getElementById('qz_end').value='';
+        await loadAssessments();
+        alert('Quiz published');
+      }catch(err){ m.textContent='Network error'; m.style.display='block'; }
+    }
+    document.getElementById('saveQuiz').addEventListener('click', saveQuiz);
+    document.getElementById('create').addEventListener('click', async ()=>{
+      const cls=Number(document.getElementById('cls').value), crs=Number(document.getElementById('crs').value), typ=document.getElementById('typ').value, marks=Number(document.getElementById('marks').value||0), inst=document.getElementById('inst').value.trim();
+      if(typ==='Quiz'){ onTypeChange(); window.scrollTo({top:document.getElementById('quizBuilder').offsetTop-80,behavior:'smooth'}); return; }
+      const dueAtVal=document.getElementById('dueAt').value; if(!cls||!crs||!typ||!dueAtVal){ const m=document.getElementById('msg'); m.textContent='Fill required fields'; m.style.display='block'; return; }
+      try{
+        const start_at=document.getElementById('startAt').value?new Date(document.getElementById('startAt').value).toISOString():null;
+        const due_at=new Date(dueAtVal).toISOString();
+        const due_date=due_at.slice(0,10);
+        const r=await fetch(API+'/api/faculty/assessments',{method:'POST',headers:{'Content-Type':'application/json','X-Faculty-Id':fid},body:JSON.stringify({class_id:cls,course_id:crs,type:typ,total_marks:marks,due_date,due_at, instructions:inst, start_at})});
+        const d=await r.json();
+        if(!r.ok){
+          const m=document.getElementById('msg'); m.textContent=d.error||'Failed to create assessment'; m.style.display='block';
+        }else{
+          document.getElementById('msg').style.display='none';
+          await loadAssessments();
+        }
+      }catch(err){
+        const m=document.getElementById('msg'); m.textContent='Network error creating assessment'; m.style.display='block';
+      }
+    });
+    // Wire View buttons
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button.view-btn');
+      if(btn){ const id=btn.dataset.id; window.location.href = `assessment-details.html?id=${id}`; }
+    });
+    (async()=>{ await loadBase(); await loadAssessments(); await loadQuizzes(); onTypeChange(); })();
+  </script>
+</body>
+</html>

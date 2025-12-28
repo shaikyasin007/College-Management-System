@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e;--hit-blue:#00A8E8;--hit-gold:#FFC300;--line:#e5e7eb}
+    /* Fullscreen centered layout */
+    body{min-height:100vh;margin:0;display:grid;place-items:center;background:radial-gradient(1200px 700px at 10% 10%,rgba(0,168,232,.20),transparent),radial-gradient(1000px 600px at 90% 20%,rgba(255,195,0,.18),transparent),linear-gradient(180deg,var(--bg2),var(--bg1));overflow:hidden}
+    /* Animated background blobs */
+    .bg{position:fixed;inset:0;pointer-events:none}
+    .blob{position:absolute;filter:blur(40px);opacity:.35;border-radius:50%;mix-blend-mode:screen}
+    .b1{width:420px;height:420px;background:#5b5bd6;left:-120px;top:-80px;animation:float1 12s ease-in-out infinite}
+    .b2{width:500px;height:500px;background:#00c2ff;right:-160px;top:10%;animation:float2 14s ease-in-out infinite}
+    .b3{width:380px;height:380px;background:#ffc300;left:20%;bottom:-140px;animation:float3 16s ease-in-out infinite}
+    @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,20px)}}
+    @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,10px)}}
+    @keyframes float3{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-30px)}}
+
+    /* Glass card */
+    .card{position:relative;width:min(480px,92vw);padding:28px 26px 26px;border-radius:16px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    .brand-mini{display:flex;align-items:center;gap:10px;margin-bottom:18px;color:#e6eefc}
+    .brand-mini img{width:36px;height:36px}
+    h1{margin:0 0 8px;color:#fff}
+    .sub{color:#cbd5e1;font-size:14px}
+    form{margin-top:12px}
+    .field{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);padding:10px 12px;border-radius:12px;margin-top:12px}
+    .field span.label{color:#e2e8f0;font-size:14px;width:92px}
+    .field input{border:none;outline:none;flex:1;font-size:15px;background:transparent;color:#fff}
+    .toggle{cursor:pointer;color:#e2e8f0}
+    .btn-login{display:block;width:100%;margin-top:18px;background:linear-gradient(135deg,var(--hit-gold),var(--hit-blue));border:none;color:#0b1020;font-weight:700;padding:12px 14px;border-radius:12px;box-shadow:0 8px 20px rgba(0,168,232,.35);transition:transform .12s ease, box-shadow .12s ease}
+    .btn-login:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,168,232,.45)}
+    .muted{color:#cbd5e1;font-size:13px;margin-top:8px}
+    .lang{margin-top:14px;font-size:14px;color:#e2e8f0}
+    .logo-top{position:absolute;top:18px;right:18px}
+    .error{color:#fecaca;font-size:14px;margin-top:8px;display:none}
+
+    /* Role selector */
+    .role-row{display:flex;gap:8px;align-items:center;margin-top:10px;font-size:14px;color:#e2e8f0}
+    .role-row label{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.24);cursor:pointer;background:rgba(15,23,42,.45)}
+    .role-row input[type="radio"]{accent-color:var(--hit-gold)}
+
+    @media (max-width: 600px){
+      .card{padding:24px 20px}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+  <main>
+    <div class="card">
+      <div class="logo-top"><img src="assets/logo.svg" alt="HIT logo" width="40"></div>
+      <div class="brand-mini">
+        <img src="assets/logo.svg" alt="logo">
+        <div>
+          <strong>Heema Institute</strong>
+          <div class="sub">Secure access for students & faculty</div>
+        </div>
+      </div>
+      <h1>Sign in</h1>
+      <p class="sub">Use your institute credentials to continue.</p>
+      <form id="loginForm">
+        <label class="field">
+          <span class="label">Username</span>
+          <input id="username" type="text" placeholder="Enter username or ID" autocomplete="username" />
+        </label>
+        <label class="field">
+          <span class="label">Password</span>
+          <input id="password" type="password" placeholder="Enter password" autocomplete="current-password" />
+          <span class="toggle" id="pwToggle">👁️</span>
+        </label>
+        <div class="error" id="err">Enter username and password.</div>
+        <button class="btn btn-primary btn-login" type="submit">LOGIN</button>
+      </form>
+      <div class="muted"><a href="#">Forgot Password?</a></div>
+      <div class="lang">🌐 Choose Language <strong>English</strong></div>
+    </div>
+  </main>
+  <script src="auth.js"></script>
+  <script>
+    // CNS: Multi-Factor Authentication (MFA) with One-Time Password (OTP)
+    // Step 1 (Password factor): Client sends username+password to backend for verification.
+    // Step 2 (OTP factor): If password OK, backend generates a random 6-digit OTP,
+    //   hashes it with SHA-256, stores with 3-minute expiry and max 3 attempts (defense vs brute force & replay),
+    //   and returns an MFA token. Frontend redirects to otp.html to verify.
+    // This adds a second, time-based factor, improving security over password-only login.
+    const form = document.getElementById('loginForm');
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const err = document.getElementById('err');
+    const pwToggle = document.getElementById('pwToggle');
+    const loginBtn = document.querySelector('.btn-login');
+
+    pwToggle.addEventListener('click', () => {
+      passInput.type = passInput.type === 'password' ? 'text' : 'password';
+    });
+
+    let submitting = false;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = userInput.value.trim();
+      const password = passInput.value;
+
+      if (!username || !password) {
+        err.textContent = 'Enter username and password.';
+        err.style.display = 'block';
+        return;
+      }
+      err.style.display = 'none';
+      if (submitting) return; // debounce double submit
+      submitting = true;
+      loginBtn.disabled = true; const oldText = loginBtn.textContent; loginBtn.textContent = 'Sending OTP...';
+      try {
+        // Call backend MFA initiation (password check + OTP issue)
+        const r = await fetch('http://localhost:4001/api/mfa/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await r.json();
+        if (!r.ok) {
+          err.textContent = data.error || 'Login failed. Try again.';
+          err.style.display = 'block';
+          submitting = false; loginBtn.disabled = false; loginBtn.textContent = oldText; return;
+        }
+        if (data && data.mfa_required && data.mfa_token) {
+          // Store MFA session locally (temporary)
+          sessionStorage.setItem('mfa_token', data.mfa_token);
+          sessionStorage.setItem('mfa_user', JSON.stringify(data.user || {}));
+          // Compute absolute expiry from now; backend provides 180s
+          const expiresAt = Date.now() + ((data.expires_in || 180) * 1000);
+          sessionStorage.setItem('mfa_expires_at', String(expiresAt));
+          // Inform user and redirect to OTP page
+          window.location.href = 'otp.html';
+        } else {
+          err.textContent = 'Unexpected response. Try again.';
+          err.style.display = 'block';
+          submitting = false; loginBtn.disabled = false; loginBtn.textContent = oldText;
+        }
+      } catch (error) {
+        err.textContent = 'Could not reach backend. Please try again.';
+        err.style.display = 'block';
+        submitting = false; loginBtn.disabled = false; loginBtn.textContent = oldText;
+      }
+    });
+  </script>
+</body>
+</html>
+
+

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Profile – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--panel:#ffffff;--ink:#0b1020;--muted:#667085;--line:#e5e7eb;--accent:#0ea5e9;--gold:#FFC300;--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow-x:hidden}
+    /* Hide legacy header/layout */
+    .header{display:none}
+    .layout{display:none}
+    /* Fixed header (match faculty/admin) */
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main.wrap{padding-top:76px}
+    /* Cards and layout */
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .section-title{margin:0 0 8px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width: 980px){ .grid-3{grid-template-columns:1fr 1fr} .grid-2{grid-template-columns:1fr} }
+    @media (max-width: 640px){ .grid-3{grid-template-columns:1fr} }
+    .tile{cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:flex-start;justify-content:space-between;transition:transform .12s ease, box-shadow .12s ease}
+    .tile:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(59,130,246,.25)}
+    .tile h3{margin:0;color:#e8eefc;font-size:16px}
+    .tile p{margin:0;color:#9fb0c5;font-size:13px}
+    .muted{color:#94a3b8;font-size:12px}
+    .krow{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#c7f9ff;font-size:11px}
+    .crumb{display:flex;align-items:center;gap:10px;color:#475467}
+    .hdr-actions{display:flex;align-items:center;gap:10px}
+    .icon-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid var(--line);border-radius:10px;background:#fff}
+    .avatar-sm{width:34px;height:34px;border-radius:999px;object-fit:cover;border:1px solid var(--line)}
+
+    .layout{display:grid;grid-template-columns:280px 1fr;gap:0;width:min(1280px,94%);margin:16px auto;position:relative;z-index:1}
+    .sidebar{background:linear-gradient(180deg,#0f172a,#0b1220);border:1px solid rgba(255,255,255,.08);border-radius:16px;height:calc(100dvh - 120px);box-shadow:0 10px 30px rgba(2,6,23,.25);color:#e2e8f0}
+    .profile-card{display:flex;flex-direction:column;align-items:center;padding:22px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .avatar{width:84px;height:84px;border-radius:999px;object-fit:cover;border:3px solid rgba(255,255,255,.18)}
+    .status{color:#34d399;font-weight:600;margin-top:6px}
+    .menu{padding:10px}
+    .menu a{position:relative;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;color:#e5e7eb;text-decoration:none;border:1px solid transparent;transition:background .15s ease,border-color .15s ease,transform .05s ease}
+    .menu a .ic{width:18px;text-align:center;opacity:1}
+    .menu a:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+    .menu a.active{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.22);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+    .menu a .dot{width:4px;height:22px;border-radius:3px;background:transparent}
+    .menu a.active .dot{background:#ff6a00}
+    .menu a.active::before{content:"";position:absolute;left:-1px;top:6px;bottom:6px;width:4px;border-radius:3px;background:#ff6a00}
+
+    /* Icon accents */
+    .menu a[data-tab="profile"] .ic{color:#8b5cf6}
+    .menu a[data-tab="courses"] .ic{color:#22c55e}
+    .menu a[data-tab="assessments"] .ic{color:#fb923c}
+    .menu a[data-tab="calendar"] .ic{color:#2563eb}
+    .menu a[data-tab="catalog"] .ic{color:#06b6d4}
+    .menu a[data-tab="attendance"] .ic{color:#f59e0b}
+
+    .content{background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:16px;min-height:70vh;box-shadow:0 20px 60px rgba(2,6,23,.12)}
+    .tabs{position:relative;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding:14px 16px;background:linear-gradient(180deg,#fff,rgba(255,255,255,.92))}
+    .tabs button{background:#f1f5f9;border:1px solid #e2e8f0;padding:8px 12px;font-weight:600;color:#475467;cursor:pointer;border-radius:999px}
+    .tabs button.active{color:#fff;background:#2563eb;border-color:#2563eb}
+    .tabs .underline{display:none}
+    .pane{padding:20px;display:none;opacity:0}
+    .pane.active{display:block}
+    .pane.show{animation:paneIn .35s ease both}
+    @keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 40px}
+    .row{display:grid;grid-template-columns:220px 1fr;gap:10px;padding:10px 0;border-bottom:1px dashed #eef2f7}
+    .label{color:#6b7280}
+    .edit{margin-left:auto}
+    .edit .btn{background:#fff;border:1px solid var(--line);border-radius:999px;padding:.4rem .8rem}
+    .edit .btn:hover{border-color:#2563eb;color:#2563eb}
+
+    /* Tables */
+    table.clean{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    table.clean thead th{background:#f8fafc;color:#475467;padding:10px;border-bottom:1px solid var(--line)}
+    table.clean tbody td{padding:10px;border-bottom:1px solid #eef2f7}
+    table.clean tbody tr:nth-child(odd){background:#fafbff}
+    table.clean tbody tr:hover{background:#f5f9ff}
+
+    /* Animated page background */
+    .bg{position:fixed;inset:-40px;z-index:0;pointer-events:none}
+    .blob{position:absolute;filter:blur(60px);opacity:.28;border-radius:50%}
+    .bg1{width:520px;height:520px;background:#60a5fa;left:-140px;top:-120px;animation:floatA 16s ease-in-out infinite}
+    .bg2{width:600px;height:600px;background:#a78bfa;right:-180px;top:10%;animation:floatB 18s ease-in-out infinite}
+    .bg3{width:500px;height:500px;background:#67e8f9;left:25%;bottom:-200px;animation:floatC 22s ease-in-out infinite}
+    @keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,10px)}}
+    @keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,20px)}}
+    @keyframes floatC{0%,100%{transform:translate(0,0)}50%{transform:translate(10px,-25px)}}
+  </style>
+</head>
+<body>
+  <div class="bg"><span class="blob bg1"></span><span class="blob bg2"></span><span class="blob bg3"></span></div>
+  <!-- New fixed header (matches Admin/Faculty) -->
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- New dashboard layout (card-based) -->
+  <main class="wrap">
+    <!-- Profile overview -->
+    <section class="card" style="margin-top:14px">
+      <h2 class="section-title">Profile Overview</h2>
+      <div class="grid-3">
+        <div>
+          <div class="muted">Full Name</div>
+          <div id="ov_name">—</div>
+        </div>
+        <div>
+          <div class="muted">Student ID</div>
+          <div id="ov_id">—</div>
+        </div>
+        <div>
+          <div class="muted">Email</div>
+          <div id="ov_email">—</div>
+        </div>
+        <div>
+          <div class="muted">Department</div>
+          <div id="ov_dep">—</div>
+        </div>
+        <div>
+          <div class="muted">Class / Section</div>
+          <div id="ov_class">—</div>
+        </div>
+        <div class="span-2">
+          <div class="muted">Enrolled Courses</div>
+          <div class="krow" id="ov_courses"></div>
+        </div>
+        <div>
+          <div class="muted">Account Status</div>
+          <div id="ov_status">—</div>
+        </div>
+        <div>
+          <div class="muted">Last Login</div>
+          <div id="ov_last">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick actions -->
+    <section style="margin-top:16px">
+      <div class="grid-3">
+        <a class="card tile" href="courses.html"><h3>My Courses</h3><p>View enrolled courses</p></a>
+        <a class="card tile" href="assessments.html"><h3>Assessments</h3><p>View and attempt</p></a>
+        <a class="card tile" href="submissions.html"><h3>Submissions</h3><p>Track your attempts</p></a>
+        <a class="card tile" href="attendance.html"><h3>Attendance</h3><p>View subject-wise</p></a>
+        <a class="card tile" href="materials.html"><h3>Study Materials</h3><p>Notes and links</p></a>
+        <a class="card tile" href="performance.html"><h3>Performance</h3><p>Progress & marks</p></a>
+        <a class="card tile" href="announcements.html"><h3>Announcements</h3><p>Latest updates</p></a>
+      </div>
+    </section>
+
+    <!-- Recent activity -->
+    <section class="card" style="margin-top:16px">
+      <h2 class="section-title">Recent Activity</h2>
+      <ul class="list" id="activity">
+        <li class="muted">Loading...</li>
+      </ul>
+    </section>
+  </main>
+
+  
+
+  <script src="../auth.js"></script>
+  <script>
+    // Require student session
+    const role = sessionStorage.getItem('auth_role')||'';
+    if(role !== 'student'){ window.location.href = '../login.html'; }
+
+    const studentId = sessionStorage.getItem('auth_user_id')||'';
+    const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName;
+    document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+    document.getElementById('ov_name').textContent = studentName;
+    document.getElementById('ov_id').textContent = studentId||'—';
+    document.getElementById('ov_last').textContent = new Date().toLocaleString();
+
+    const API = 'http://localhost:4001';
+    async function loadMe(){
+      try{
+        const r = await fetch(API+'/api/student/me', { headers: { 'X-Student-Id': studentId } });
+        const d = await r.json(); if(!r.ok) throw new Error(d.error||'Failed to load');
+        const s = d.student || {};
+        document.getElementById('ov_dep').textContent = s.department?.name || '—';
+        document.getElementById('ov_class').textContent = s.class?.name || '—';
+        document.getElementById('ov_status').textContent = (s.status||'ACTIVE').toString().toUpperCase();
+        document.getElementById('ov_last').textContent = new Date(s.last_login||Date.now()).toLocaleString();
+        document.getElementById('ov_email').textContent = s.email || '—';
+        const crs = (s.courses||[]).map(c=> (c.code? (c.code+' – '):'') + (c.name||''));
+        document.getElementById('ov_courses').innerHTML = (crs.length?crs:['—']).map(x=>`<span class="chip">${x}</span>`).join('');
+      }catch(e){ console.warn('[student/dashboard] loadMe failed:', e.message); }
+    }
+
+    async function loadActivity(){
+      const list = document.getElementById('activity');
+      try{
+        const [assR, annR] = await Promise.all([
+          fetch(API+'/api/student/assessments', { headers: { 'X-Student-Id': studentId } }),
+          fetch(API+'/api/student/announcements', { headers: { 'X-Student-Id': studentId } })
+        ]);
+        const ass = await assR.json(); const ann = await annR.json();
+        const items = [];
+        (ass.items||[]).slice(0,5).forEach(a=>{
+          const due = a.due_at || a.due_date; const when = due? new Date(due).toLocaleString(): '—';
+          items.push(`<li>Assessment: <strong>${a.type}</strong> in ${a.course_code||a.course_name||''} · Due ${when}</li>`);
+        });
+        (ann.items||[]).slice(0,5).forEach(an=>{
+          items.push(`<li>Announcement: <strong>${an.title||'Notice'}</strong> · ${new Date(an.created_at).toLocaleString()}</li>`);
+        });
+        list.innerHTML = items.length? items.join('') : '<li class="muted">No recent activity.</li>';
+      }catch(e){ list.innerHTML = '<li class="muted">Unable to load activity.</li>'; }
+    }
+
+    loadMe();
+    loadActivity();
+  </script>
+</body>
+</html>

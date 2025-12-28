@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hyderabad Institute of Technology</title>
+  <meta name="description" content="Hyderabad Institute of Technology – world‑class programs, research and vibrant campus life." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+</head>
+<body>
+  <!-- Top strip -->
+  <div class="topbar">
+    <div class="container">
+      <div class="tb-left">
+        <span>📞 +91 93909 15797</span>
+        <span>✉️ info@heema.edu</span>
+      </div>
+      <div class="tb-right">
+        <a href="login.html" class="btn btn-ghost">Portal Login</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <header class="nav">
+    <div class="container">
+      <a class="brand" href="#">
+        <div class="logo"><img src="assets/logo.svg" alt="Heema Institute of Technology logo" /></div>
+        <div>
+          <strong>Hyderabad Institute</strong>
+          <small>Excellence in Education</small>
+        </div>
+      </a>
+      <nav class="menu">
+        <a href="#about">About</a>
+        <a href="#programs">Academics</a>
+        <a href="#admissions">Admissions</a>
+        <a href="#life">Campus Life</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="btn btn-primary" href="https://www.heema-it.edu/apply-now">Apply Now</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" style="background-image: url('assets/campus.jpg')">
+    <div class="overlay"></div>
+    <canvas class="hero-particles" id="heroParticles" aria-hidden="true"></canvas>
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <span class="pill">NAAC A+ Accredited</span>
+        <h1>Shape Your Future at <span>Hyderabad Institute of Technology</span></h1>
+        <p>India's premier educational institution offering world‑class programs, cutting‑edge research facilities, and unparalleled career opportunities.</p>
+        <div class="cta">
+          <a class="btn btn-light" href="#programs">Explore Programs →</a>
+          <a class="btn btn-outline" href="https://www.heema-it.edu/downloads/hit_brochure_2025.pdf">Download Brochure</a>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="val" data-count="25">0</div>
+            <div class="lbl">Years Legacy</div>
+          </div>
+          <div class="metric">
+            <div class="val" data-count="50" data-suffix="K+">0</div>
+            <div class="lbl">Alumni Network</div>
+          </div>
+          <div class="metric">
+            <div class="val" data-count="98" data-suffix="%">0</div>
+            <div class="lbl">Placement Rate</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-cards">
+        <div class="card feature">
+          <div class="icon">👩‍🏫</div>
+          <h3>Expert Faculty</h3>
+          <p>Learn from industry leaders and academic experts.</p>
+        </div>
+        <div class="card feature">
+          <div class="icon">🌐</div>
+          <h3>Global Exposure</h3>
+          <p>International collaborations and exchange programs.</p>
+        </div>
+        <div class="card feature">
+          <div class="icon">🏆</div>
+          <h3>Top Rankings</h3>
+          <p>Consistently among India's best institutions.</p>
+        </div>
+        <div class="card feature accent">
+          <div class="big">100+</div>
+          <p>Corporate Partners for Placements</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Updates ticker -->
+  <div class="ticker" role="region" aria-label="Latest updates">
+    <div class="container">
+      <span>🔔 Latest Updates</span>
+      <div class="ticker-track" data-ticker aria-live="polite">
+        <ul class="ticker-list">
+          <li>Alumni Achievement: HIT graduate becomes Tech Unicorn CEO</li>
+          <li>Admissions open for 2025 batch</li>
+          <li>Research Grant of ₹10Cr awarded to AI Lab</li>
+        </ul>
+        <div class="ticker-controls">
+          <button class="btn btn-ghost" aria-label="Previous update" data-ticker-prev>‹</button>
+          <button class="btn btn-ghost" aria-label="Next update" data-ticker-next>›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About -->
+  <!-- Key Stats Strip -->
+  <section class="stats-strip">
+    <div class="container cards-grid reveal">
+      <div class="card stat">
+        <div class="icon">👨‍🎓</div>
+        <h3>15,000+</h3>
+        <p>Active Students</p>
+      </div>
+      <div class="card stat">
+        <div class="icon">🎯</div>
+        <h3>98%</h3>
+        <p>Placement Success</p>
+      </div>
+      <div class="card stat">
+        <div class="icon">🏢</div>
+        <h3>250+</h3>
+        <p>Industry Partners</p>
+      </div>
+      <div class="card stat">
+        <div class="icon">💼</div>
+        <h3>12 LPA</h3>
+        <p>Average Package</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="section">
+    <div class="container about-grid reveal">
+      <div class="about-img-wrap">
+        <img class="about-img" alt="Campus" src="group.jpeg" />
+      </div>
+      <div class="about-copy">
+        <span class="pill">About Heema</span>
+        <h2>Building Tomorrow's Leaders Today</h2>  
+        <p>HIT stands as a beacon of educational excellence for over 25 years, combining academic rigor with practical industry exposure.</p>
+        <ul class="checks">
+          <li>State‑of‑the‑art Infrastructure</li>
+          <li>Research & Innovation Centers</li>
+          <li>Industry‑Integrated Curriculum</li>
+          <li>International Collaborations</li>
+        </ul>
+        <div class="about-cards">
+          <div class="mini-card">
+            <div class="icon">🎯</div>
+            <h4>Our Mission</h4>
+            <p>Empower students with knowledge and skills for global success.</p>
+          </div>
+          <div class="mini-card">
+            <div class="icon">👁️</div>
+            <h4>Our Vision</h4>
+            <p>Be a world‑class institution fostering innovation and excellence.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs -->
+  <section id="programs" class="section light">
+    <div class="container">
+      <span class="pill">Academic Programs</span>
+      <h2>Explore Our Programs</h2>
+      <p class="sub">Choose from UG, PG, and Doctoral programs designed to meet industry demands.</p>
+      <div class="cards-grid reveal">
+        <article class="card program">
+          <div class="icon">🧠</div>
+          <h3>Computer Science & Engineering (B.Tech)</h3>
+          <p>AI, ML, Data Science, Cybersecurity, Cloud</p>
+          <div class="meta"><span>180 Seats</span><span>4 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/cse.html">View Details →</a>
+        </article>
+        <article class="card program">
+          <div class="icon">⚗️</div>
+          <h3>Electronics & Communication (B.Tech)</h3>
+          <p>VLSI, IoT, Embedded Systems, Telecom</p>
+          <div class="meta"><span>150 Seats</span><span>4 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/ece.html">View Details →</a>
+        </article>
+        <article class="card program">
+          <div class="icon">🏗️</div>
+          <h3>Civil Engineering (B.Tech)</h3>
+          <p>Structures, Transportation, Construction</p>
+          <div class="meta"><span>120 Seats</span><span>4 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/civil.html">View Details →</a>
+        </article>
+        <article class="card program">
+          <div class="icon">🛠️</div>
+          <h3>Mechanical Engineering (B.Tech)</h3>
+          <p>Robotics, Automotive, Manufacturing</p>
+          <div class="meta"><span>150 Seats</span><span>4 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/mech.html">View Details →</a>
+        </article>
+        <article class="card program">
+          <div class="icon">💼</div>
+          <h3>MBA (Master of Business Administration)</h3>
+          <p>Marketing, Finance, HR, Operations, BA</p>
+          <div class="meta"><span>180 Seats</span><span>2 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/mba.html">View Details →</a>
+        </article>
+        <article class="card program">
+          <div class="icon">💊</div>
+          <h3>B.Pharmacy</h3>
+          <p>Clinical Pharmacy, Drug Discovery, Pharmaceutics</p>
+          <div class="meta"><span>120 Seats</span><span>4 Years</span></div>
+          <a class="btn btn-primary ghost" href="programs/pharmacy.html">View Details →</a>
+        </article>
+      </div>
+      <div class="center mt-24">
+        <a class="btn btn-outline" href="programs/index.html">View All Programs & Eligibility</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Awards band -->
+  <section class="awards">
+    <div class="container center">
+      <span class="pill">Awards & Recognition</span>
+      <h2>Celebrating Excellence</h2>
+    </div>
+    <div class="container awards-grid reveal">
+      <div class="award">
+        <div class="icon">🏅</div>
+        <h4>Ranked #1</h4>
+        <p>Best Private Institution in the State</p>
+      </div>
+      <div class="award">
+        <div class="icon">⭐</div>
+        <h4>NAAC A+ Accredited</h4>
+        <p>With 3.6 CGPA Score</p>
+      </div>
+      <div class="award">
+        <div class="icon">⚡</div>
+        <h4>NBA Accredited</h4>
+        <p>All Engineering Programs</p>
+      </div>
+      <div class="award">
+        <div class="icon">🔬</div>
+        <h4>500+ Patents</h4>
+        <p>Filed by Faculty & Students</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Campus Life -->
+  <section id="life" class="section">
+    <div class="container">
+      <span class="pill">Student Life</span>
+      <h2>Experience Campus Life</h2>
+      <p class="sub">A vibrant campus with world‑class facilities, diverse student activities, and a thriving community.</p>
+      <div class="life-grid reveal">
+        <a class="life-card" style="--img:url('https://images.unsplash.com/photo-1529154691717-3306083d8699?q=80&w=1600&auto=format&fit=crop')">
+          <div class="badge">Central Library</div>
+          <span>50,000+ books · E‑journals · Quiet zones</span>
+        </a>
+        <a class="life-card" style="--img:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop')">
+          <div class="badge">Innovation Labs</div>
+          <span>AI/Robotics · Maker space · Prototyping</span>
+        </a>
+        <a class="life-card" style="--img:url('https://images.unsplash.com/photo-1518602164577-0b6a72776f81?q=80&w=1600&auto=format&fit=crop')">
+          <div class="badge">Sports Complex</div>
+          <span>Indoor arena · Turf grounds · Gym</span>
+        </a>
+      </div>
+
+      <div class="activities reveal">
+        <div class="act"><div>🎵</div><strong>50+</strong><span>Cultural Events</span></div>
+        <div class="act"><div>👥</div><strong>75+</strong><span>Student Clubs</span></div>
+        <div class="act"><div>☕</div><strong>5</strong><span>Cafeterias</span></div>
+        <div class="act"><div>🏅</div><strong>20+</strong><span>Sports Teams</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section light">
+    <div class="container">
+      <span class="pill">Student Success Stories</span>
+      <h2>What Our Alumni Say</h2>
+      <div class="slider reveal" data-slider>
+        <div class="slide card testimonial active">
+          <div class="quote">❝</div>
+          <p>At HIT, I worked on real industry projects and landed a full‑time offer during final year.</p>
+          <hr />
+          <h4>Vikram N</h4>
+          <small>Software Engineer, Amazon · B.Tech CSE 2024</small>
+        </div>
+        <div class="slide card testimonial">
+          <div class="quote">❝</div>
+          <p>The ECE labs and mentorship helped me crack my first VLSI design role.</p>
+          <hr />
+          <h4>Harini K</h4>
+          <small>Design Engineer, Qualcomm · B.Tech ECE 2023</small>
+        </div>
+        <div class="slide card testimonial">
+          <div class="quote">❝</div>
+          <p>MBA at HIT sharpened my leadership and analytics skills. The alumni network is strong.</p>
+          <hr />
+          <h4>Rahul Mehta</h4>
+          <small>Product Manager, FinTech · MBA 2022</small>
+        </div>
+        <div class="slider-controls">
+          <button class="btn btn-ghost" data-prev>‹</button>
+          <button class="btn btn-ghost" data-next>›</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Events -->
+  <section class="section" id="admissions">
+    <div class="container">
+      <span class="pill">Upcoming Events</span>
+      <h2>Campus Events & Activities</h2>
+      <div class="cards-grid reveal">
+        <article class="card event">
+          <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1600&auto=format&fit=crop" alt="Hackathon" />
+          <div class="tag">Technical</div>
+          <h3>HIT Hackathon 2025</h3>
+          <ul class="list">
+            <li>📅 Feb 21–22, 2025</li>
+            <li>⏰ 24‑hour coding marathon</li>
+            <li>📍 Innovation Lab</li>
+          </ul>
+          <p>Build AI, web, and IoT projects with mentors from industry.</p>
+          <a class="btn btn-primary ghost">Register Now →</a>
+        </article>
+        <article class="card event">
+          <img src="https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?q=80&w=1600&auto=format&fit=crop" alt="Placement" />
+          <div class="tag">Placement</div>
+          <h3>Campus Placements Week</h3>
+          <ul class="list">
+            <li>📅 Mar 18–22, 2025</li>
+            <li>⏰ 9:00 AM onwards</li>
+            <li>📍 Placement Cell</li>
+          </ul>
+          <p>Top tech, core, and consulting firms hiring across departments.</p>
+          <a class="btn btn-primary ghost">Register Now →</a>
+        </article>
+        <article class="card event">
+          <img src="https://images.unsplash.com/photo-1532634773-79a0e603a969?q=80&w=1600&auto=format&fit=crop" alt="Symposium" />
+          <div class="tag">Academic</div>
+          <h3>Annual Research Symposium</h3>
+          <ul class="list">
+            <li>📅 Apr 12, 2025</li>
+            <li>⏰ 2:00 PM</li>
+            <li>📍 Convention Center</li>
+          </ul>
+          <p>Showcase of innovative research by students and faculty with keynote speakers.</p>
+          <a class="btn btn-primary ghost">Register Now →</a>
+        </article>
+      </div>
+      <div class="center mt-24"><a class="link">View All Events →</a></div>
+    </div>
+  </section>
+
+  <!-- Newsletter + Footer -->
+  <section class="newsletter">
+    <div class="container">
+      <h3>Stay Connected</h3>
+      <p>Subscribe to get updates on admissions, events, and news</p>
+      <form class="subscribe" onsubmit="event.preventDefault()">
+        <input type="email" placeholder="Enter your email" required />
+        <button class="btn btn-primary">Subscribe →</button>
+      </form>
+    </div>
+  </section>
+
+  <footer id="contact" class="footer">
+    <div class="container foot-grid">
+      <div class="brand-col">
+        <div class="brand">
+          <div class="logo">HIT</div>
+          <div>
+            <strong>Hyderabad Institute</strong>
+            <small>Committed to excellence for 25+ years</small>
+          </div>
+        </div>
+        <div class="socials">
+          <a></a><a></a><a></a><a></a><a></a>
+        </div>
+      </div>
+      <div>
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a>About Us</a></li>
+          <li><a>Admissions</a></li>
+          <li><a>Academic Programs</a></li>
+          <li><a>Placements</a></li>
+          <li><a>Research</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul>
+          <li><a>Digital Library</a></li>
+          <li><a>Student Portal</a></li>
+          <li><a>Faculty Portal</a></li>
+          <li><a>Career Services</a></li>
+          <li><a>Campus Map</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Contact Us</h5>
+        <ul class="contact">
+          <li>🏫 Hyderabad Campus, Survey No. 123, Hyderabad – 500001</li>
+          <li>📞 +91 93909 15797</li>
+          <li>✉️ info@heema.edu</li>
+        </ul>
+      </div>
+    </div>
+    <div class="container small print">© 2025 Hyderabad Institute of Technology. All rights reserved. <a>Privacy</a> · <a>Terms</a> · <a>Sitemap</a></div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

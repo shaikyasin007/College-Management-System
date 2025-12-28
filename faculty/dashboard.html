@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Faculty Dashboard – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    /* Fixed header */
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    /* Layout */
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    @media (max-width: 980px){ .grid-3{grid-template-columns:1fr 1fr} .grid-2{grid-template-columns:1fr} }
+    @media (max-width: 640px){ .grid-3{grid-template-columns:1fr} }
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .tile{cursor:pointer;display:flex;flex-direction:column;gap:8px;align-items:flex-start;justify-content:space-between;transition:transform .12s ease, box-shadow .12s ease}
+    .tile:hover{transform:translateY(-2px);box-shadow:0 18px 50px rgba(59,130,246,.25)}
+    .tile h3{margin:0;color:#e8eefc;font-size:16px}
+    .tile p{margin:0;color:#9fb0c5;font-size:13px}
+    .section-title{margin:0 0 8px}
+    .list{margin:0;padding:0}
+    .list li{list-style:none;margin:8px 0;padding:10px 12px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.45);border-radius:12px;font-size:13px;color:#dbe2f9}
+    .muted{color:#94a3b8;font-size:12px}
+    .krow{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#c7f9ff;font-size:11px}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Faculty Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Profile overview -->
+    <section class="card" style="margin-top:14px">
+      <h2 class="section-title">Profile Overview</h2>
+      <div class="grid-3">
+        <div>
+          <div class="muted">Full Name</div>
+          <div id="ov_name">—</div>
+        </div>
+        <div>
+          <div class="muted">Faculty ID</div>
+          <div id="ov_id">—</div>
+        </div>
+        <div>
+          <div class="muted">Department</div>
+          <div id="ov_dep">—</div>
+        </div>
+        <div class="span-2">
+          <div class="muted">Assigned Classes</div>
+          <div class="krow" id="ov_classes"></div>
+        </div>
+        <div>
+          <div class="muted">Assigned Courses</div>
+          <div class="krow" id="ov_courses"></div>
+        </div>
+        <div>
+          <div class="muted">Account Status</div>
+          <div id="ov_status">—</div>
+        </div>
+        <div>
+          <div class="muted">Last Login</div>
+          <div id="ov_last">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick actions -->
+    <section style="margin-top:16px">
+      <div class="grid-3">
+        <a class="card tile" href="assessments.html"><h3>Manage Assessments</h3><p>Create and schedule assessments</p></a>
+        <a class="card tile" href="submissions.html"><h3>Review Submissions</h3><p>Grade and give feedback</p></a>
+        <a class="card tile" href="attendance.html"><h3>Take Attendance</h3><p>Mark daily presence</p></a>
+        <a class="card tile" href="materials.html"><h3>Course Materials</h3><p>Upload notes and links</p></a>
+        <a class="card tile" href="performance.html"><h3>Student Performance</h3><p>Analyze results & export</p></a>
+        <a class="card tile" href="announcements.html"><h3>Announcements</h3><p>Notify your classes</p></a>
+      </div>
+    </section>
+
+    <!-- Recent activity -->
+    <section class="card" style="margin-top:16px">
+      <h2 class="section-title">Recent Activity</h2>
+      <ul class="list" id="activity">
+        <li class="muted">No recent activity yet.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    // Require faculty session
+    const role = sessionStorage.getItem('auth_role')||'';
+    if(role !== 'faculty'){ window.location.href = '../login.html'; }
+
+    const facultyId = sessionStorage.getItem('auth_user_id')||'';
+    const facultyName = sessionStorage.getItem('auth_name')||'Faculty';
+    document.getElementById('hdr_name').textContent = facultyName;
+    document.getElementById('hdr_id').textContent = 'ID: ' + (facultyId||'—');
+    document.getElementById('ov_name').textContent = facultyName;
+    document.getElementById('ov_id').textContent = facultyId||'—';
+    document.getElementById('ov_status').textContent = 'ACTIVE';
+    document.getElementById('ov_last').textContent = new Date().toLocaleString();
+
+    // Fetch real profile from backend filtered by faculty id
+    const API = 'http://localhost:4001';
+    async function loadProfile(){
+      try{
+        const r = await fetch(API+'/api/faculty/me', { headers: { 'X-Faculty-Id': facultyId } });
+        const data = await r.json(); if(!r.ok) throw new Error(data.error||'Failed to load profile');
+        const f = data.faculty || {};
+        document.getElementById('ov_dep').textContent = f.department?.name || '—';
+        const cls = (f.classes||[]).map(c=>c.name);
+        const crs = (f.courses||[]).map(c=> (c.code? (c.code+' – '):'') + (c.name||''));
+        document.getElementById('ov_classes').innerHTML = (cls.length?cls:['—']).map(x=>`<span class="chip">${x}</span>`).join('');
+        document.getElementById('ov_courses').innerHTML = (crs.length?crs:['—']).map(x=>`<span class="chip">${x}</span>`).join('');
+      }catch(e){ console.warn('[faculty/dashboard] profile load failed:', e.message); }
+    }
+    loadProfile();
+  </script>
+</body>
+</html>

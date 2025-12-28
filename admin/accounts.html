@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accounts – Admin Console</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    .page-wrap{width:min(1160px,96%);margin:18px auto 40px}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+    .tabs .btn{padding:8px 12px;border-radius:999px}
+    /* Smooth tab transitions */
+    .box{transition:opacity .2s ease, transform .2s ease}
+    .box.is-hidden{opacity:0;pointer-events:none;position:absolute;transform:translateY(6px)}
+    .box{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:22px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.65)}
+    .section-title{margin:0 0 6px;font-size:18px}
+    .section-sub{margin:0 0 10px;color:#9ca3af;font-size:12px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px}
+    .shell-3{display:grid;grid-template-columns:1fr;gap:22px}
+    .span-2{grid-column:span 1}
+    .form-wrap{max-width:780px;margin:0 auto}
+    .data-table{width:100%;border-collapse:separate;border-spacing:0 6px}
+    .compact-table{max-height:240px;overflow:auto;padding-right:2px}
+    .data-table thead th{font-weight:600;color:#cbd5f5;font-size:12px;padding:8px 10px;border-bottom:1px solid rgba(148,163,184,.25)}
+    .data-table tbody td{font-size:12px;color:#e5e7eb;padding:8px 10px;background:rgba(2,6,23,.45)}
+    .data-table tbody tr{transition:transform .08s ease, background .08s ease}
+    .data-table tbody tr:hover{background:rgba(56,189,248,.08)}
+    .chip{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#c7f9ff;font-size:11px}
+    @media (max-width: 880px){ .grid-2{grid-template-columns:1fr} }
+    @media (max-width: 1100px){ .grid-4{grid-template-columns:repeat(3,minmax(0,1fr))} }
+    @media (max-width: 980px){ .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))} .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media (max-width: 640px){ .grid-4,.grid-3{grid-template-columns:1fr} }
+
+    /* Inputs polish */
+    .form-grid{row-gap:20px}
+    .form-grid .field label{display:block;margin:0 0 6px;font-weight:600;color:#e2e8f0;font-size:12px}
+    .form-grid .field input, .form-grid .field select{width:100%;border-radius:10px;border:1px solid rgba(148,163,184,.32);background:rgba(15,23,42,.95);padding:12px 14px}
+    .form-grid .field input:focus, .form-grid .field select:focus{border-color:#38bdf8; box-shadow:0 0 0 1px rgba(56,189,248,.35)}
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus{
+      -webkit-text-fill-color:#e5e7eb;
+      -webkit-box-shadow:0 0 0px 1000px rgba(15,23,42,.95) inset;
+      box-shadow:0 0 0px 1000px rgba(15,23,42,.95) inset;
+      transition:background-color 99999s ease-in-out 0s;
+    }
+    .tabs .btn.btn-primary{background:linear-gradient(180deg,#60a5fa,#3b82f6); box-shadow:0 8px 20px rgba(59,130,246,.35)}
+    .tabs .btn.btn-outline{background:rgba(2,6,23,.4)}
+    .full .btn{width:100%}
+
+    .aside{border:1px solid rgba(148,163,184,.24);border-radius:14px;padding:14px;background:rgba(2,6,23,.5)}
+    .aside h4{margin:0 0 8px;font-size:14px}
+    .aside .row{display:flex;justify-content:space-between;gap:8px;margin:6px 0;font-size:12px}
+    .muted{color:#94a3b8;font-size:11px}
+    .meter{height:8px;border-radius:999px;background:rgba(148,163,184,.2);overflow:hidden;margin-top:6px}
+    .meter .bar{height:100%;background:linear-gradient(90deg,#f97316,#22c55e);width:0%}
+    .field-msg{font-size:11px;margin-top:4px}
+    .field-msg.error{color:#fca5a5}
+    .field-msg.ok{color:#86efac}
+    @media (max-width: 1200px){ .shell-3{grid-template-columns:1fr} .span-2{grid-column:span 1} }
+
+    /* Background accents */
+    .bg{position:fixed;inset:-60px;pointer-events:none;z-index:0}
+    .blob{position:absolute;filter:blur(70px);opacity:.28;border-radius:50%;mix-blend-mode:screen}
+    .b1{width:640px;height:640px;background:#60a5fa;left:-160px;top:-160px;animation:floatA 20s ease-in-out infinite}
+    .b2{width:700px;height:700px;background:#a855f7;right:-220px;top:0;animation:floatB 22s ease-in-out infinite}
+    .b3{width:600px;height:600px;background:#22c55e;left:30%;bottom:-240px;animation:floatC 26s ease-in-out infinite}
+    @keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,18px)}}
+    @keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(-24px,22px)}}
+    @keyframes floatC{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-24px)}}
+    .content{position:relative;z-index:1}
+    /* Fixed admin header */
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right .btn{margin-left:8px}
+    .btn-active{background:linear-gradient(180deg,#60a5fa,#3b82f6);color:#06111f;border-color:transparent}
+    main.wrap{padding-top:76px}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <div>
+          <strong>Heema Institute of Technology</strong>
+          <div class="nav-sub">Admin Console</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn btn-active" type="button">Create Accounts</button>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <main class="wrap page-wrap content">
+    <section class="card-shell">
+      <div class="card-header">
+        <div>
+          <h2>Create Accounts</h2>
+          <small>Create individual student and faculty accounts</small>
+        </div>
+      </div>
+      <div class="tabs">
+        <button id="tabStudent" class="btn btn-primary" type="button">Student Account</button>
+        <button id="tabFaculty" class="btn btn-outline" type="button">Faculty Account</button>
+      </div>
+
+      <div id="studentBox" class="box" style="display:block">
+        <div class="card-header" style="padding:0 0 12px 0"><div><h2 class="section-title">New Student</h2><small class="section-sub">Create a student account (unique email and phone required)</small></div></div>
+        <div class="shell-3">
+          <div>
+            <div class="form-grid">
+        <div class="field"><label style="opacity:.8">Section A · Basic Information</label></div>
+        <div class="field"><label for="stu_name">Full name</label><input id="stu_name" type="text" /></div>
+        <div class="field"><label for="stu_email">Email</label><input id="stu_email" type="email" /></div>
+        <div class="field"><label for="stu_phone">Phone</label><input id="stu_phone" type="text" /></div>
+        <div class="field"><label style="opacity:.8">Section B · Academic Information</label></div>
+        <div class="field"><label for="stu_dep">Department</label><select id="stu_dep"></select></div>
+        <div class="field"><label for="stu_class">Class</label><select id="stu_class"></select></div>
+        <div class="field"><label style="opacity:.8">Section C · Security</label></div>
+        <div class="field"><label for="stu_pass">Password</label><input id="stu_pass" type="password" /></div>
+        <div class="field"><label for="stu_conf">Confirm</label><input id="stu_conf" type="password" /></div>
+        <div class="full">
+          <button class="btn btn-primary" id="btnCreateStudent" type="button" disabled>Create Student Account</button>
+          <div class="error" id="stu_err"></div>
+          <div class="success" id="stu_ok"></div>
+        </div>
+            </div>
+          </div>
+          <aside class="aside">
+            <h4>Details Preview</h4>
+            <div class="row"><span>Name</span><strong id="p_stu_name">—</strong></div>
+            <div class="row"><span>Email</span><strong id="p_stu_email">—</strong></div>
+            <div class="row"><span>Department</span><strong id="p_stu_dep">—</strong></div>
+            <div class="row"><span>Class</span><strong id="p_stu_class">—</strong></div>
+            <div class="row" style="flex-direction:column;align-items:stretch">
+              <span class="muted">Password strength</span>
+              <div class="meter"><div class="bar" id="p_stu_pass_strength"></div></div>
+            </div>
+            <div class="muted" style="margin-top:8px">Unique email and phone required.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-shell" style="margin-top:16px">
+      <div id="facultyBox" class="box" style="display:none">
+        <div class="card-header" style="padding:0 0 12px 0"><div><h2 class="section-title">New Faculty</h2><small class="section-sub">Create a faculty account (unique email and phone required)</small></div></div>
+        <div class="shell-3">
+          <div>
+            <div class="form-grid">
+          <div class="field"><label style="opacity:.8">Section A · Basic Information</label></div>
+          <div class="field"><label for="fac_name">Full name</label><input id="fac_name" type="text" /></div>
+          <div class="field"><label for="fac_email">Email</label><input id="fac_email" type="email" /></div>
+          <div class="field"><label for="fac_phone">Phone</label><input id="fac_phone" type="text" /></div>
+          <div class="field"><label style="opacity:.8">Section B · Academic Information</label></div>
+          <div class="field"><label for="fac_dep">Department</label><select id="fac_dep"></select></div>
+          <div class="field"><label for="fac_desig">Designation</label><input id="fac_desig" type="text" placeholder="e.g. Assistant Professor" /></div>
+          <div class="field"><label style="opacity:.8">Section C · Security</label></div>
+          <div class="field"><label for="fac_pass">Password</label><input id="fac_pass" type="password" /></div>
+          <div class="full"><button class="btn btn-primary" id="btnCreateFaculty" type="button" disabled>Create Faculty Account</button></div>
+          <div class="error" id="fac_err"></div>
+          <div class="success" id="fac_ok"></div>
+            </div>
+          </div>
+          <aside class="aside">
+            <h4>Details Preview</h4>
+            <div class="row"><span>Name</span><strong id="p_fac_name">—</strong></div>
+            <div class="row"><span>Email</span><strong id="p_fac_email">—</strong></div>
+            <div class="row"><span>Department</span><strong id="p_fac_dep">—</strong></div>
+            <div class="row" style="flex-direction:column;align-items:stretch">
+              <span class="muted">Password strength</span>
+              <div class="meter"><div class="bar" id="p_fac_pass_strength"></div></div>
+            </div>
+            <div class="muted" style="margin-top:8px">Unique email and phone required.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-shell" style="margin-top:16px">
+      <div class="card-header"><h2 class="section-title">Lists</h2><small class="section-sub">Recent Students and Faculty</small></div>
+      <div class="grid-2">
+        <div class="box compact-table">
+          <h3 style="margin:6px 0 8px;font-size:14px">Students</h3>
+          <table id="tblStudents" class="data-table">
+            <thead><tr><th align="left">Name</th><th align="left">Email</th><th align="left">Dept</th><th align="left">Class</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="box compact-table">
+          <h3 style="margin:6px 0 8px;font-size:14px">Faculty</h3>
+          <table id="tblFaculty" class="data-table">
+            <thead><tr><th align="left">Name</th><th align="left">Email</th><th align="left">Dept</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const jwt = sessionStorage.getItem('admin_jwt');
+    if(!jwt){ window.location.href = 'backend-login.html'; }
+
+    const API = 'http://localhost:4001';
+    const authHeader = () => ({ 'Authorization': 'Bearer ' + sessionStorage.getItem('admin_jwt') });
+    async function apiGet(path){ const r = await fetch(API+path,{ headers: { ...authHeader() } }); return r.json(); }
+    async function apiPost(path, body){ const r = await fetch(API+path,{ method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(body) }); const data = await r.json(); if(!r.ok) throw new Error(data.error||'Request failed'); return data; }
+
+    const el = (id)=>document.getElementById(id);
+
+    function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+    function validPhone(v){ return /^\d{10,15}$/.test(v); }
+
+    let depMap = {}; let classMap = {};
+    async function loadDeps(){ const { departments } = await apiGet('/api/academics/departments');
+      depMap = Object.fromEntries(departments.map(d=>[d.id, d.name]));
+      const opts = departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+      el('stu_dep').innerHTML = '<option value="">— Select Department —</option>'+opts;
+      el('fac_dep').innerHTML = '<option value="">— Select Department —</option>'+opts;
+    }
+
+    async function loadClasses(){ const depId = el('stu_dep').value || ''; const q = depId ? ('?department_id='+depId) : '';
+      const { classes } = await apiGet('/api/academics/classes'+q);
+      const opts = classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      el('stu_class').innerHTML = '<option value="">— Select Class —</option>'+opts;
+    }
+
+    async function loadAllClasses(){ const { classes } = await apiGet('/api/academics/classes');
+      classMap = Object.fromEntries(classes.map(c=>[c.id, c.name]));
+    }
+
+    async function loadStudents(){ const { students } = await apiGet('/api/accounts/students');
+      const rows = students.map(s=>{
+        const d = s.department_id ? (depMap[s.department_id]||s.department_id) : '';
+        const c = s.class_id ? (classMap[s.class_id]||s.class_id) : '';
+        return `<tr><td>${s.name}</td><td>${s.email}</td><td>${d?`<span class="chip">${d}</span>`:''}</td><td>${c?`<span class=\"chip\">${c}</span>`:''}</td></tr>`;
+      }).join('');
+      el('tblStudents').querySelector('tbody').innerHTML = rows;
+    }
+
+    async function loadFaculty(){ const { faculty } = await apiGet('/api/accounts/faculty');
+      el('tblFaculty').querySelector('tbody').innerHTML = faculty.map(f=>{
+        const d = f.department_id ? (depMap[f.department_id]||f.department_id) : '';
+        return `<tr><td>${f.name}</td><td>${f.email}</td><td>${d?`<span class=\"chip\">${d}</span>`:''}</td></tr>`;
+      }).join('');
+    }
+
+    // Live previews
+    function strength(p){
+      let s=0; if(!p) return 0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\d/.test(p))s++; if(/[^A-Za-z0-9]/.test(p))s++; return Math.min(100, s*20);
+    }
+    function updateStudentPreview(){
+      el('p_stu_name').textContent = el('stu_name').value.trim()||'—';
+      el('p_stu_email').textContent = el('stu_email').value.trim()||'—';
+      const did = el('stu_dep').value; const cid = el('stu_class').value;
+      el('p_stu_dep').textContent = did ? (depMap[Number(did)]||did) : '—';
+      el('p_stu_class').textContent = cid ? (classMap[Number(cid)]||cid) : '—';
+      el('p_stu_pass_strength').style.width = strength(el('stu_pass').value)+'%';
+    }
+    function updateFacultyPreview(){
+      el('p_fac_name').textContent = el('fac_name').value.trim()||'—';
+      el('p_fac_email').textContent = el('fac_email').value.trim()||'—';
+      const did = el('fac_dep').value; el('p_fac_dep').textContent = did ? (depMap[Number(did)]||did) : '—';
+      el('p_fac_pass_strength').style.width = strength(el('fac_pass').value)+'%';
+    }
+    function msgId(id){ return id+"_msg"; }
+    function setMsg(id, ok, text){
+      const input = el(id);
+      let span = document.getElementById(msgId(id));
+      if(!span){ span = document.createElement('div'); span.id = msgId(id); span.className='field-msg'; input.parentElement.appendChild(span); }
+      if(text){ span.textContent = text; span.className = 'field-msg ' + (ok? 'ok':'error'); span.style.display='block'; }
+      else { span.textContent=''; span.style.display='none'; }
+    }
+
+    function validateStudentForm(){
+      const name = el('stu_name').value.trim();
+      const email = el('stu_email').value.trim();
+      const phone = el('stu_phone').value.trim();
+      const dep = el('stu_dep').value;
+      const cls = el('stu_class').value;
+      const pass = el('stu_pass').value;
+      const conf = el('stu_conf').value;
+      let ok = true;
+      if(!name){ ok=false; setMsg('stu_name', false, 'Full name is required'); } else setMsg('stu_name', true, '');
+      if(!email){ ok=false; setMsg('stu_email', false, 'Email is required'); }
+      else if(!validEmail(email)){ ok=false; setMsg('stu_email', false, 'Enter a valid email'); }
+      else setMsg('stu_email', true, '');
+      if(phone && !validPhone(phone)){ ok=false; setMsg('stu_phone', false, 'Phone must be 10–15 digits'); } else setMsg('stu_phone', true, '');
+      if(!dep){ ok=false; setMsg('stu_dep', false, 'Select a department'); } else setMsg('stu_dep', true, '');
+      if(!cls){ ok=false; setMsg('stu_class', false, 'Select a class'); } else setMsg('stu_class', true, '');
+      const str = strength(pass);
+      if(!pass){ ok=false; setMsg('stu_pass', false, 'Password is required'); }
+      else if(pass.length<8){ ok=false; setMsg('stu_pass', false, 'At least 8 characters'); }
+      else if(str<60){ ok=false; setMsg('stu_pass', false, 'Add upper, lower, number, symbol'); } else setMsg('stu_pass', true, '');
+      if(conf!==pass){ ok=false; setMsg('stu_conf', false, 'Passwords must match'); } else setMsg('stu_conf', true, '');
+      el('btnCreateStudent').disabled = !ok;
+      return ok;
+    }
+
+    function validateFacultyForm(){
+      const name = el('fac_name').value.trim();
+      const email = el('fac_email').value.trim();
+      const phone = el('fac_phone').value.trim();
+      const dep = el('fac_dep').value;
+      const pass = el('fac_pass').value;
+      let ok = true;
+      if(!name){ ok=false; setMsg('fac_name', false, 'Full name is required'); } else setMsg('fac_name', true, '');
+      if(!email){ ok=false; setMsg('fac_email', false, 'Email is required'); }
+      else if(!validEmail(email)){ ok=false; setMsg('fac_email', false, 'Enter a valid email'); }
+      else setMsg('fac_email', true, '');
+      if(phone && !validPhone(phone)){ ok=false; setMsg('fac_phone', false, 'Phone must be 10–15 digits'); } else setMsg('fac_phone', true, '');
+      if(!dep){ ok=false; setMsg('fac_dep', false, 'Select a department'); } else setMsg('fac_dep', true, '');
+      const str = strength(pass);
+      if(!pass){ ok=false; setMsg('fac_pass', false, 'Password is required'); }
+      else if(pass.length<8){ ok=false; setMsg('fac_pass', false, 'At least 8 characters'); }
+      else if(str<60){ ok=false; setMsg('fac_pass', false, 'Add upper, lower, number, symbol'); } else setMsg('fac_pass', true, '');
+      el('btnCreateFaculty').disabled = !ok;
+      return ok;
+    }
+
+    ['stu_name','stu_email','stu_phone','stu_dep','stu_class','stu_pass','stu_conf'].forEach(id=>{
+      el(id).addEventListener('input', ()=>{ updateStudentPreview(); validateStudentForm(); });
+      el(id).addEventListener('change', ()=>{ updateStudentPreview(); validateStudentForm(); });
+    });
+    ['fac_name','fac_email','fac_phone','fac_dep','fac_pass'].forEach(id=>{
+      el(id).addEventListener('input', ()=>{ updateFacultyPreview(); validateFacultyForm(); });
+      el(id).addEventListener('change', ()=>{ updateFacultyPreview(); validateFacultyForm(); });
+    });
+
+    el('stu_dep').addEventListener('change', loadClasses);
+    const tabStudent = document.getElementById('tabStudent');
+    const tabFaculty = document.getElementById('tabFaculty');
+    const studentBox = document.getElementById('studentBox');
+    const facultyBox = document.getElementById('facultyBox');
+    function setTab(which){
+      const show = which==='student' ? studentBox : facultyBox;
+      const hide = which==='student' ? facultyBox : studentBox;
+      hide.classList.add('is-hidden');
+      setTimeout(()=>{ hide.style.display='none'; show.style.display='block'; requestAnimationFrame(()=> show.classList.remove('is-hidden')); }, 120);
+      if(which==='student'){ tabStudent.className='btn btn-primary'; tabFaculty.className='btn btn-outline'; }
+      else { tabStudent.className='btn btn-outline'; tabFaculty.className='btn btn-primary'; }
+    }
+    tabStudent.addEventListener('click', ()=>setTab('student'));
+    tabFaculty.addEventListener('click', ()=>setTab('faculty'));
+
+    el('btnCreateStudent').addEventListener('click', async ()=>{
+      el('stu_err').style.display='none'; el('stu_ok').style.display='none';
+      const name = el('stu_name').value.trim(); const email = el('stu_email').value.trim(); const phone = el('stu_phone').value.trim(); const department_id = el('stu_dep').value?Number(el('stu_dep').value):null; const class_id = el('stu_class').value?Number(el('stu_class').value):null; const pass = el('stu_pass').value; const conf = el('stu_conf').value;
+      if(!validateStudentForm()) { el('stu_err').textContent='Please fix highlighted fields'; el('stu_err').style.display='block'; return; }
+      try { await apiPost('/api/accounts/students', { name, email, phone: phone||null, department_id, class_id, password: pass }); el('stu_ok').textContent='Student created'; el('stu_ok').style.display='block'; el('stu_name').value=el('stu_email').value=el('stu_phone').value=el('stu_pass').value=el('stu_conf').value=''; await loadStudents(); }
+      catch(e){ const msg = (e.message||'').includes('already in use') ? 'Email or phone already exists. Each user must have a unique account.' : e.message; el('stu_err').textContent=msg; el('stu_err').style.display='block'; }
+      updateStudentPreview(); validateStudentForm();
+    });
+
+    el('btnCreateFaculty').addEventListener('click', async ()=>{
+      el('fac_err').style.display='none'; el('fac_ok').style.display='none';
+      const name = el('fac_name').value.trim(); const email = el('fac_email').value.trim(); const phone = el('fac_phone').value.trim(); const department_id = el('fac_dep').value?Number(el('fac_dep').value):null; const pass = el('fac_pass').value;
+      if(!validateFacultyForm()){ el('fac_err').textContent='Please fix highlighted fields'; el('fac_err').style.display='block'; return; }
+      try { await apiPost('/api/accounts/faculty', { name, email, phone: phone||null, department_id, password: pass }); el('fac_ok').textContent='Faculty created'; el('fac_ok').style.display='block'; el('fac_name').value=el('fac_email').value=el('fac_phone').value=el('fac_pass').value=''; await loadFaculty(); }
+      catch(e){ const msg = (e.message||'').includes('already in use') ? 'Email or phone already exists. Each user must have a unique account.' : e.message; el('fac_err').textContent=msg; el('fac_err').style.display='block'; }
+      updateFacultyPreview(); validateFacultyForm();
+    });
+
+    (async ()=>{ await loadDeps(); await loadAllClasses(); await loadClasses(); await loadStudents(); await loadFaculty(); updateStudentPreview(); updateFacultyPreview(); validateStudentForm(); validateFacultyForm(); setTab('student'); })();
+  </script>
+</body>
+</html>

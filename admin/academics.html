@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Academics – Admin Console</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    .page-wrap{width:min(1160px,96%);margin:18px auto 40px}
+    .box{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:22px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.65)}
+    .section-title{margin:0 0 6px;font-size:18px}
+    .section-sub{margin:0 0 10px;color:#9ca3af;font-size:12px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 14px}
+    @media (max-width: 1100px){ .grid-4{grid-template-columns:repeat(3,minmax(0,1fr))} }
+    @media (max-width: 980px){ .grid-4{grid-template-columns:repeat(2,minmax(0,1fr))} .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media (max-width: 640px){ .grid-4,.grid-3,.grid-2{grid-template-columns:1fr} }
+    .form-grid{row-gap:18px}
+    .form-grid .field input,.form-grid .field select, .form-grid .field textarea{border-radius:12px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.96);padding:10px 12px;width:100%}
+    .form-grid .field input:focus,.form-grid .field select:focus,.form-grid .field textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 1px rgba(56,189,248,.35)}
+    .data-table{width:100%;border-collapse:separate;border-spacing:0 6px}
+    .data-table thead th{font-weight:600;color:#cbd5f5;font-size:12px;padding:8px 10px;border-bottom:1px solid rgba(148,163,184,.25)}
+    .data-table tbody td{font-size:12px;color:#e5e7eb;padding:8px 10px;background:rgba(2,6,23,.45)}
+    .compact{max-height:260px;overflow:auto}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+    .tabs .btn{padding:8px 12px;border-radius:999px}
+    .view{transition:opacity .18s ease, transform .18s ease}
+    .view.is-hidden{opacity:0;pointer-events:none;position:absolute;transform:translateY(6px)}
+    .msg{font-size:12px;margin-top:6px}
+    .msg.error{color:#fca5a5}
+    .msg.ok{color:#86efac}
+    .bg{position:fixed;inset:-60px;pointer-events:none;z-index:0}
+    .blob{position:absolute;filter:blur(70px);opacity:.28;border-radius:50%;mix-blend-mode:screen}
+    .b1{width:640px;height:640px;background:#60a5fa;left:-160px;top:-160px;animation:floatA 20s ease-in-out infinite}
+    .b2{width:700px;height:700px;background:#a855f7;right:-220px;top:0;animation:floatB 22s ease-in-out infinite}
+    .b3{width:600px;height:600px;background:#22c55e;left:30%;bottom:-240px;animation:floatC 26s ease-in-out infinite}
+    @keyframes floatA{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,18px)}}
+    @keyframes floatB{0%,100%{transform:translate(0,0)}50%{transform:translate(-24px,22px)}}
+    @keyframes floatC{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-24px)}}
+    .content{position:relative;z-index:1}
+    /* Fixed academic header */
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right .btn{margin-left:8px}
+    .btn-active{background:linear-gradient(180deg,#60a5fa,#3b82f6);color:#06111f;border-color:transparent}
+    main.wrap{padding-top:76px}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <div>
+          <strong>Heema Institute of Technology</strong>
+          <div class="nav-sub">Admin Console – Academics</div>
+        </div>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        <button class="btn btn-active" type="button">Academics</button>
+        <button class="btn btn-outline" onclick="window.location.href='accounts.html'">Accounts</button>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="bg"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <main class="wrap page-wrap content">
+    <section class="card-shell">
+      <div class="card-header">
+        <div>
+          <h2>Academics</h2>
+          <small>Manage Departments, Classes, Courses, and Assignments</small>
+        </div>
+      </div>
+      <div class="tabs">
+        <button id="vDepsBtn" class="btn btn-primary" type="button">Departments</button>
+        <button id="vClassesBtn" class="btn btn-outline" type="button">Classes</button>
+        <button id="vCoursesBtn" class="btn btn-outline" type="button">Courses</button>
+        <button id="vAssignBtn" class="btn btn-outline" type="button">Assignments & Mappings</button>
+      </div>
+    </section>
+
+    <!-- View: Departments -->
+    <section id="vDeps" class="view" style="display:block">
+      <div class="box">
+        <div class="card-header"><div><h2 class="section-title">Departments</h2><small class="section-sub">Manage academic departments</small></div></div>
+        <div class="form-grid grid-3">
+          <div class="field span-2"><label for="dep_name">Department Name</label><input id="dep_name" type="text" placeholder="e.g. Computer Science and Engineering" /></div>
+          <div class="field"><label for="dep_code">Department Code (optional)</label><input id="dep_code" type="text" placeholder="e.g. CSE" /></div>
+          <div class="field span-2"><label for="dep_desc">Description (optional)</label><textarea id="dep_desc" rows="3" placeholder="Short description"></textarea></div>
+          <div class="field"><button class="btn btn-primary" id="btnCreateDep" type="button" style="margin-top:22px">Create Department</button></div>
+          <div id="dep_msg" class="msg" style="display:none"></div>
+        </div>
+        <div class="box compact" style="margin-top:14px">
+          <h3 style="margin:0 0 8px;font-size:14px">Existing Departments</h3>
+          <table class="data-table" id="tblDeps"><thead><tr><th align="left">Department Name</th><th align="left">Code</th><th align="left">Created</th><th align="left">Status</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Classes -->
+    <section id="vClasses" class="view" style="display:none">
+      <div class="box">
+        <div class="card-header"><div><h2 class="section-title">Classes</h2><small class="section-sub">Create and manage classes under departments</small></div></div>
+        <div class="form-grid grid-4">
+          <div class="field"><label for="cls_dep">Department</label><select id="cls_dep"></select></div>
+          <div class="field"><label for="cls_name">Class Name</label><input id="cls_name" type="text" placeholder="e.g. CSE-A" /></div>
+          <div class="field"><label for="cls_year">Academic Year</label><input id="cls_year" type="text" placeholder="2025-26" /></div>
+          <div class="field"><label for="cls_sem">Semester (optional)</label><input id="cls_sem" type="text" placeholder="Sem 3" /></div>
+          <div class="field span-2"><button class="btn btn-primary" id="btnCreateClass" type="button">Create Class</button></div>
+          <div id="cls_msg" class="msg" style="display:none"></div>
+        </div>
+        <div class="box compact" style="margin-top:14px">
+          <h3 style="margin:0 0 8px;font-size:14px">Existing Classes</h3>
+          <table class="data-table" id="tblClasses"><thead><tr><th align="left">Class Name</th><th align="left">Department</th><th align="left">Year</th><th align="left">Courses</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Courses -->
+    <section id="vCourses" class="view" style="display:none">
+      <div class="box">
+        <div class="card-header"><div><h2 class="section-title">Courses</h2><small class="section-sub">Create and manage courses</small></div></div>
+        <div class="form-grid grid-4">
+          <div class="field"><label for="crs_dep">Department</label><select id="crs_dep"></select></div>
+          <div class="field"><label for="crs_code">Course Code</label><input id="crs_code" type="text" placeholder="CSE201" /></div>
+          <div class="field"><label for="crs_name">Course Name</label><input id="crs_name" type="text" placeholder="Data Structures" /></div>
+          <div class="field"><label for="crs_credits">Credits</label><input id="crs_credits" type="number" min="0" step="1" placeholder="4" /></div>
+          <div class="field span-2"><label for="crs_desc">Course Description (optional)</label><textarea id="crs_desc" rows="3" placeholder="Short description"></textarea></div>
+          <div class="field span-2"><button class="btn btn-primary" id="btnCreateCourse" type="button">Create Course</button></div>
+          <div id="crs_msg" class="msg" style="display:none"></div>
+        </div>
+        <div class="box compact" style="margin-top:14px">
+          <h3 style="margin:0 0 8px;font-size:14px">Existing Courses</h3>
+          <table class="data-table" id="tblCourses"><thead><tr><th align="left">Course Code</th><th align="left">Course Name</th><th align="left">Department</th><th align="left">Credits</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- View: Assignments & Mappings -->
+    <section id="vAssign" class="view" style="display:none">
+      <div class="box">
+        <div class="card-header"><div><h2 class="section-title">Academic Assignments</h2><small class="section-sub">Assign courses to classes and faculty to courses/classes</small></div></div>
+        <div class="grid-2">
+          <div class="box">
+            <h3 style="margin:0 0 6px;font-size:14px">Section A · Assign Course to Class</h3>
+            <div class="form-grid grid-3">
+              <div class="field"><label for="ac_dep">Department</label><select id="ac_dep"></select></div>
+              <div class="field"><label for="ac_class">Class</label><select id="ac_class"></select></div>
+              <div class="field"><label for="ac_course">Course</label><select id="ac_course"></select></div>
+              <div class="field span-2"><button class="btn btn-primary" id="btnAssignClassCourse" type="button">Assign Course</button></div>
+              <div id="ac_msg" class="msg" style="display:none"></div>
+            </div>
+          </div>
+          <div class="box">
+            <h3 style="margin:0 0 6px;font-size:14px">Section B · Assign Faculty</h3>
+            <div class="form-grid grid-3">
+              <div class="field"><label for="af_faculty">Faculty</label><select id="af_faculty"></select></div>
+              <div class="field"><label for="af_course">Course</label><select id="af_course"></select></div>
+              <div class="field"><label for="af_class">Class (optional)</label><select id="af_class"><option value="">—</option></select></div>
+              <div class="field span-2"><button class="btn btn-primary" id="btnAssignFaculty" type="button">Assign Faculty</button></div>
+              <div id="af_msg" class="msg" style="display:none"></div>
+            </div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:14px">
+          <div class="box compact">
+            <h3 style="margin:0 0 8px;font-size:14px">Class → Course mappings</h3>
+            <table class="data-table" id="tblClassCourses"><thead><tr><th align="left">Class</th><th align="left">Course</th></tr></thead><tbody></tbody></table>
+          </div>
+          <div class="box compact">
+            <h3 style="margin:0 0 8px;font-size:14px">Faculty → Course mappings</h3>
+            <table class="data-table" id="tblFacultyCourses"><thead><tr><th align="left">Faculty</th><th align="left">Course</th><th align="left">Class</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const jwt = sessionStorage.getItem('admin_jwt');
+    if(!jwt){ window.location.href = 'backend-login.html'; }
+
+    const API = 'http://localhost:4001';
+    const authHeader = () => ({ 'Authorization': 'Bearer ' + sessionStorage.getItem('admin_jwt') });
+    async function apiGet(path){ const r = await fetch(API+path,{ headers: { ...authHeader() } }); const data = await r.json(); if(!r.ok) { throw new Error(data.error || ('Request failed: '+path)); } return data; }
+    async function apiPost(path, body){ const r = await fetch(API+path,{ method:'POST', headers: { 'Content-Type':'application/json', ...authHeader() }, body: JSON.stringify(body) }); const data = await r.json(); if(!r.ok) throw new Error(data.error||'Request failed'); return data; }
+
+    const el = (id)=>document.getElementById(id);
+    const setMsg = (id, ok, text)=>{ const m = el(id); if(!m) return; m.textContent = text||''; m.className = 'msg ' + (ok? 'ok':'error'); m.style.display = text ? 'block':'none'; };
+
+    // Maps for readable names
+    let depMap = {}; let classMap = {}; let courseMap = {}; let facultyMap = {};
+
+    async function loadDeps(){
+      const { departments } = await apiGet('/api/academics/departments');
+      depMap = Object.fromEntries(departments.map(d=>[d.id, d.name]));
+      const opts = departments.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+      ['cls_dep','crs_dep','ac_dep'].forEach(id=>{ const n = el(id); if(n) n.innerHTML = opts; });
+      // Render departments table
+      const tbody = el('tblDeps').querySelector('tbody');
+      tbody.innerHTML = departments.map(d=>`<tr><td>${d.name||''}</td><td>${d.code||''}</td><td>${(d.created_at||'').toString().slice(0,10)}</td><td>${d.status||'Active'}</td></tr>`).join('');
+    }
+
+    async function loadClasses(){
+      const depId = el('cls_dep')? el('cls_dep').value : '';
+      const q = depId ? ('?department_id='+depId) : '';
+      const { classes } = await apiGet('/api/academics/classes'+q);
+      classMap = Object.fromEntries(classes.map(c=>[c.id, c.name]));
+      const opts = classes.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      if(el('ac_class')) el('ac_class').innerHTML = opts;
+      if(el('af_class')) el('af_class').innerHTML = '<option value="">—</option>'+opts;
+      // Render table (existing classes)
+      if(el('tblClasses')){
+        const tbody = el('tblClasses').querySelector('tbody');
+        tbody.innerHTML = classes.map(c=>`<tr><td>${c.name}</td><td>${depMap[c.department_id]||c.department_id||''}</td><td>${c.year||''}</td><td>${c.courses_count||''}</td></tr>`).join('');
+      }
+    }
+
+    async function loadAllCourses(){ const { courses } = await apiGet('/api/academics/courses'); courseMap = Object.fromEntries(courses.map(c=>[c.id, `${c.code||''} ${c.name}`.trim()])); }
+    async function loadCourses(){
+      const depId = el('crs_dep')? el('crs_dep').value : '';
+      const q = depId ? ('?department_id='+depId) : '';
+      const { courses } = await apiGet('/api/academics/courses'+q);
+      const opts = courses.map(c=>`<option value="${c.id}">${c.code||''} ${c.name}</option>`).join('');
+      if(el('ac_course')) el('ac_course').innerHTML = opts;
+      if(el('af_course')) el('af_course').innerHTML = opts;
+      if(el('tblCourses')){
+        const tbody = el('tblCourses').querySelector('tbody');
+        tbody.innerHTML = courses.map(c=>`<tr><td>${c.code||''}</td><td>${c.name||''}</td><td>${depMap[c.department_id]||c.department_id||''}</td><td>${c.credits||''}</td></tr>`).join('');
+      }
+    }
+
+    async function loadFaculty(){ const { faculty } = await apiGet('/api/accounts/faculty'); facultyMap = Object.fromEntries(faculty.map(f=>[f.id, f.name])); if(el('af_faculty')) el('af_faculty').innerHTML = faculty.map(f=>`<option value="${f.id}">${f.name}</option>`).join(''); }
+
+    // View switching
+    const views = { vDeps: el('vDeps'), vClasses: el('vClasses'), vCourses: el('vCourses'), vAssign: el('vAssign') };
+    function setView(key){
+      Object.keys(views).forEach(k=>{
+        if(k===key){ views[k].style.display='block'; requestAnimationFrame(()=> views[k].classList.remove('is-hidden')); }
+        else { views[k].classList.add('is-hidden'); setTimeout(()=> views[k].style.display='none', 120); }
+      });
+      // update buttons
+      el('vDepsBtn').className = 'btn '+(key==='vDeps'?'btn-primary':'btn-outline');
+      el('vClassesBtn').className = 'btn '+(key==='vClasses'?'btn-primary':'btn-outline');
+      el('vCoursesBtn').className = 'btn '+(key==='vCourses'?'btn-primary':'btn-outline');
+      el('vAssignBtn').className = 'btn '+(key==='vAssign'?'btn-primary':'btn-outline');
+    }
+    el('vDepsBtn').addEventListener('click', ()=>setView('vDeps'));
+    el('vClassesBtn').addEventListener('click', ()=>setView('vClasses'));
+    el('vCoursesBtn').addEventListener('click', ()=>setView('vCourses'));
+    el('vAssignBtn').addEventListener('click', ()=>setView('vAssign'));
+
+    // Create handlers with feedback (send only fields backend supports)
+    el('btnCreateDep').addEventListener('click', async ()=>{
+      setMsg('dep_msg', true, '');
+      try { const name = el('dep_name').value.trim(); if(!name) return setMsg('dep_msg', false, 'Department name is required'); await apiPost('/api/academics/departments', { name }); await loadDeps(); el('dep_name').value=''; el('dep_code').value=''; el('dep_desc').value=''; setMsg('dep_msg', true, 'Department created'); }
+      catch(e){ setMsg('dep_msg', false, e.message); }
+    });
+    if(el('cls_dep')) el('cls_dep').addEventListener('change', loadClasses);
+    el('btnCreateClass').addEventListener('click', async ()=>{
+      setMsg('cls_msg', true, '');
+      try { const department_id = Number(el('cls_dep').value); const name = el('cls_name').value.trim(); if(!department_id||!name) return setMsg('cls_msg', false, 'Department and Class Name are required'); await apiPost('/api/academics/classes', { department_id, name }); await loadClasses(); el('cls_name').value=''; setMsg('cls_msg', true, 'Class created'); }
+      catch(e){ setMsg('cls_msg', false, e.message); }
+    });
+    if(el('crs_dep')) el('crs_dep').addEventListener('change', loadCourses);
+    el('btnCreateCourse').addEventListener('click', async ()=>{
+      setMsg('crs_msg', true, '');
+      try { const department_id = Number(el('crs_dep').value); const code = el('crs_code').value.trim(); const name = el('crs_name').value.trim(); if(!department_id||!code||!name) return setMsg('crs_msg', false, 'Department, Code and Name are required'); await apiPost('/api/academics/courses', { department_id, code, name }); await loadCourses(); el('crs_code').value=''; el('crs_name').value=''; el('crs_credits').value=''; el('crs_desc').value=''; setMsg('crs_msg', true, 'Course created'); }
+      catch(e){ setMsg('crs_msg', false, e.message); }
+    });
+    el('btnAssignClassCourse').addEventListener('click', async ()=>{
+      setMsg('ac_msg', true, '');
+      try { const class_id = Number(el('ac_class').value); const course_id = Number(el('ac_course').value); if(!class_id||!course_id) return setMsg('ac_msg', false, 'Select class and course'); await apiPost('/api/academics/class-courses', { class_id, course_id }); setMsg('ac_msg', true, 'Course assigned to class'); await renderClassCourseMappings(); }
+      catch(e){ setMsg('ac_msg', false, e.message); }
+    });
+    el('btnAssignFaculty').addEventListener('click', async ()=>{
+      setMsg('af_msg', true, '');
+      try { const faculty_id = Number(el('af_faculty').value); const course_id = Number(el('af_course').value); const class_id = el('af_class').value ? Number(el('af_class').value) : null; if(!faculty_id||!course_id) return setMsg('af_msg', false, 'Select faculty and course'); await apiPost('/api/academics/faculty-assignments', { faculty_id, course_id, class_id }); setMsg('af_msg', true, 'Faculty assignment saved'); await renderFacultyCourseMappings(); }
+      catch(e){ setMsg('af_msg', false, e.message); }
+    });
+
+    // Mapping renders (best-effort from available endpoints if any exist)
+    async function renderClassCourseMappings(){
+      try{
+        const { class_courses } = await apiGet('/api/academics/class-courses/all');
+        const tbody = el('tblClassCourses').querySelector('tbody');
+        tbody.innerHTML = (class_courses||[]).map(m=>`<tr><td>${m.class_name}</td><td>${m.course_code||''} ${m.course_name||''}</td></tr>`).join('');
+      }catch(e){
+        const tbody = el('tblClassCourses').querySelector('tbody');
+        tbody.innerHTML = '';
+      }
+    }
+    async function renderFacultyCourseMappings(){
+      try{
+        const { assignments } = await apiGet('/api/academics/faculty-assignments');
+        const tbody = el('tblFacultyCourses').querySelector('tbody');
+        tbody.innerHTML = (assignments||[]).map(a=>`<tr><td>${a.faculty_name}</td><td>${a.course_code||''} ${a.course_name||''}</td><td>${a.class_name||''}</td></tr>`).join('');
+      }catch(e){
+        const tbody = el('tblFacultyCourses').querySelector('tbody');
+        tbody.innerHTML = '';
+      }
+    }
+
+    (async ()=>{
+      await loadDeps();
+      await loadClasses();
+      await loadAllCourses();
+      await loadCourses();
+      await loadFaculty();
+      await renderClassCourseMappings();
+      await renderFacultyCourseMappings();
+      setView('vDeps');
+    })();
+  </script>
+</body>
+</html>

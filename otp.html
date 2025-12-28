@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verify OTP – Heema Institute</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e;--hit-blue:#00A8E8;--hit-gold:#FFC300}
+    body{min-height:100vh;margin:0;display:grid;place-items:center;background:linear-gradient(180deg,var(--bg2),var(--bg1))}
+    .card{width:min(480px,92vw);padding:26px;border-radius:16px;background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+    h1{margin:0 0 8px;color:#fff}
+    p{color:#cbd5e1;margin:6px 0}
+    .field{margin-top:14px}
+    .field input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;outline:none}
+    .btn{display:block;width:100%;margin-top:16px;background:linear-gradient(135deg,var(--hit-gold),var(--hit-blue));border:none;color:#0b1020;font-weight:700;padding:12px 14px;border-radius:12px;box-shadow:0 8px 20px rgba(0,168,232,.35)}
+    .meta{display:flex;justify-content:space-between;align-items:center;color:#cbd5e1;margin-top:10px;font-size:14px}
+    .error{color:#fecaca;font-size:14px;margin-top:10px;display:none}
+    .success{color:#bbf7d0;font-size:14px;margin-top:10px;display:none}
+    .link{color:#e5e7eb;text-decoration:underline;cursor:pointer}
+    .code{font-variant-numeric:tabular-nums;letter-spacing:2px}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="card">
+      <h1>Verify OTP</h1>
+      <p id="message">We sent a 6‑digit code to your registered email. Enter it below to complete sign‑in.</p>
+      <div class="meta">
+        <span>Expires in <strong id="countdown">03:00</strong></span>
+        <span class="link" id="resend">Resend</span>
+      </div>
+      <div class="field">
+        <input id="otp" class="code" type="text" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="Enter 6‑digit OTP" />
+      </div>
+      <button id="verifyBtn" class="btn">Verify</button>
+      <div id="err" class="error"></div>
+      <div id="ok" class="success"></div>
+
+      <!-- CNS Notes:
+        - One-Time Password (OTP) Authentication: second factor after password.
+        - Hashing (SHA-256): server hashes OTP before storage.
+        - Time-based authentication: 3-minute expiry enforced server-side.
+        - Replay defense: OTP marked used immediately after success; stored only hashed.
+        - Brute-force defense: server limits to max 3 attempts.
+        - Multi-layer authentication: user needs password + time-bound OTP. -->
+    </div>
+  </main>
+
+  <script>
+    const API = 'http://localhost:4001';
+    const otpInput = document.getElementById('otp');
+    const err = document.getElementById('err');
+    const ok = document.getElementById('ok');
+    const countdownEl = document.getElementById('countdown');
+    const resendEl = document.getElementById('resend');
+
+    const mfaToken = sessionStorage.getItem('mfa_token');
+    const expiresAt = Number(sessionStorage.getItem('mfa_expires_at') || 0);
+    const user = (()=>{ try{return JSON.parse(sessionStorage.getItem('mfa_user')||'{}')}catch(_){return {}} })();
+
+    if (!mfaToken || !expiresAt) {
+      // Missing MFA session — go back to login
+      window.location.href = 'login.html';
+    }
+
+    function leftPad(n){ return String(n).padStart(2,'0'); }
+
+    let timerId;
+    function tick(){
+      const remain = Math.max(0, expiresAt - Date.now());
+      const m = Math.floor(remain/60000); const s = Math.floor((remain%60000)/1000);
+      countdownEl.textContent = leftPad(m)+':'+leftPad(s);
+      if (remain <= 0) {
+        clearInterval(timerId);
+        err.textContent = 'OTP expired. Please login again to request a new code.';
+        err.style.display = 'block';
+        document.getElementById('verifyBtn').disabled = true;
+      }
+    }
+    timerId = setInterval(tick, 250); tick();
+
+    // Verify OTP with backend. Server enforces correctness, expiry and attempt limit.
+    async function verify(){
+      err.style.display='none'; ok.style.display='none';
+      const otp = (otpInput.value||'').trim();
+      if (!/^\d{6}$/.test(otp)){
+        err.textContent = 'Enter a valid 6-digit OTP.'; err.style.display='block'; return;
+      }
+      try{
+        const r = await fetch(API+'/api/mfa/verify', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ mfa_token: mfaToken, otp })
+        });
+        const data = await r.json();
+        if (!r.ok){
+          err.textContent = data.error || 'OTP verification failed.'; err.style.display='block';
+          return;
+        }
+        // Success: server invalidated the OTP (single-use). Store session token and route by role.
+        ok.textContent = 'Verified. Signing you in...'; ok.style.display='block';
+        sessionStorage.setItem('auth_token', data.token);
+        sessionStorage.setItem('auth_role', data.user?.role || '');
+        sessionStorage.setItem('auth_username', data.user?.username || '');
+        sessionStorage.setItem('auth_user_id', String(data.user?.id || ''));
+        sessionStorage.setItem('auth_name', data.user?.name || '');
+        // Cleanup MFA session
+        sessionStorage.removeItem('mfa_token'); sessionStorage.removeItem('mfa_expires_at'); sessionStorage.removeItem('mfa_user');
+        setTimeout(()=>{
+          if (data.user?.role === 'faculty') window.location.href='faculty/dashboard.html';
+          else if (data.user?.role === 'admin') window.location.href='admin/dashboard.html';
+          else window.location.href='student/dashboard.html';
+        }, 600);
+      }catch(e){
+        err.textContent = 'Could not reach backend. Try again.'; err.style.display='block';
+      }
+    }
+
+    document.getElementById('verifyBtn').addEventListener('click', verify);
+    otpInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); verify(); } });
+
+    // Resend is a full restart of MFA flow for demo (requires password again to prevent abuse).
+    resendEl.addEventListener('click', ()=>{
+      // For security, we do not allow resending without re-validating password.
+      // Redirect back to login; user can re-enter credentials to get a fresh OTP.
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

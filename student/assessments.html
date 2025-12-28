@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Assessments – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    table.clean{width:100%;border-collapse:separate;border-spacing:0;border:1px solid rgba(148,163,184,.28);border-radius:12px;overflow:hidden}
+    table.clean thead th{background:rgba(15,23,42,.6);color:#cbd5e1;padding:10px;border-bottom:1px solid rgba(148,163,184,.28)}
+    table.clean tbody td{padding:10px;border-bottom:1px solid rgba(148,163,184,.18)}
+    .muted{color:#94a3b8}
+    .btn-sm{padding:.35rem .7rem;border-radius:8px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);color:#cbd5e1;cursor:pointer}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:600}
+    .b-open{background:rgba(37,99,235,.15);color:#93c5fd;border:1px solid rgba(37,99,235,.35)}
+    .b-sub{background:rgba(234,179,8,.12);color:#fde68a;border:1px solid rgba(234,179,8,.35)}
+    .b-eval{background:linear-gradient(90deg,#10b98133,#22c55e33);color:#bbf7d0;border:1px solid rgba(34,197,94,.35)}
+    .b-closed{background:rgba(244,63,94,.12);color:#fecaca;border:1px solid rgba(244,63,94,.35)}
+    .b-not{background:rgba(148,163,184,.18);color:#cbd5e1;border:1px solid rgba(148,163,184,.35)}
+    .act{padding:.35rem .7rem;border-radius:10px;border:1px solid transparent;cursor:pointer}
+    .act.attempt{background:#2563eb;color:#e8eefc;border-color:#2563eb}
+    .act.view-sub{background:#f59e0b;color:#111827;border-color:#f59e0b}
+    .act.view-res{background:linear-gradient(90deg,#10b981,#22c55e);color:#052e16;border-color:#16a34a}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px">Assessments</h2>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0 12px">
+        <div>
+          <label class="muted">Course</label>
+          <select id="f_course"></select>
+        </div>
+        <div>
+          <label class="muted">Date Type</label>
+          <select id="f_date_type">
+            <option value="none">None</option>
+            <option value="start">Start Date</option>
+            <option value="due">Due Date</option>
+            <option value="submit">Submission Date</option>
+          </select>
+        </div>
+        <div>
+          <label class="muted">From</label>
+          <input id="f_from" type="datetime-local" />
+        </div>
+        <div>
+          <label class="muted">To</label>
+          <input id="f_to" type="datetime-local" />
+        </div>
+      </div>
+      <table class="clean">
+        <thead><tr><th>Course</th><th>Type</th><th>Max</th><th>Start → Due</th><th>Status</th><th></th></tr></thead>
+        <tbody id="rows"><tr><td colspan="6">Loading assessments...</td></tr></tbody>
+      </table>
+      <div id="msg" class="muted" style="margin-top:8px"></div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const role = sessionStorage.getItem('auth_role')||'';
+    if(role !== 'student'){ window.location.href = '../login.html'; }
+    const studentId = sessionStorage.getItem('auth_user_id')||'';
+    const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName;
+    document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+
+    const API='http://localhost:4001';
+    function fmt(dt){ try{ return dt? new Date(dt).toLocaleString(): '—'; }catch{return '—';} }
+    function statusOf(a){
+      if(a.submission_time){ return (typeof a.submission_marks === 'number') ? 'Evaluated' : 'Submitted'; }
+      const now = Date.now();
+      const starts = a.start_at? Date.parse(a.start_at): null;
+      const due = a.due_at? Date.parse(a.due_at): (a.due_date? Date.parse(a.due_date): null);
+      if(starts && now < starts) return 'Not Started';
+      if(due && now > due) return 'Closed';
+      return 'Open';
+    }
+    function statusBadge(st){
+      const map = { 'Open':'b-open','Submitted':'b-sub','Evaluated':'b-eval','Closed':'b-closed','Not Started':'b-not','Not Submitted':'b-closed' };
+      const cls = map[st] || 'b-not';
+      return `<span class="badge ${cls}">${st}</span>`;
+    }
+    function actionBtn(a, st){
+      if(st==='Not Started' || st==='Closed') return '<span class="muted">—</span>';
+      if(a.submission_time){
+        if(typeof a.submission_marks==='number'){
+          return `<button class="act view-res" onclick="viewSubmission(${a.id})">View Result</button>`;
+        }
+        return `<button class="act view-sub" onclick="viewSubmission(${a.id})">View Submission</button>`;
+      }
+      return `<button class="act attempt" onclick="attempt(${a.id}, '${a.type||''}')">Attempt</button>`;
+    }
+    let allItems = [];
+    function withinRange(ts, fromStr, toStr){
+      if(!ts) return false;
+      const d = new Date(ts);
+      if(fromStr){ const f=new Date(fromStr); if(d < f) return false; }
+      if(toStr){ const t=new Date(toStr); if(d > t) return false; }
+      return true;
+    }
+    function applyFilters(){
+      const courseId = Number(document.getElementById('f_course').value||0);
+      const dtType = document.getElementById('f_date_type').value;
+      const from = document.getElementById('f_from').value;
+      const to = document.getElementById('f_to').value;
+      const items = allItems.filter(a=>{
+        if(courseId && a.course_id!==courseId) return false;
+        if(dtType==='start') return withinRange(a.start_at, from, to);
+        if(dtType==='due') return withinRange(a.due_at || a.due_date, from, to);
+        if(dtType==='submit') return withinRange(a.submission_time, from, to);
+        return true;
+      });
+      render(items);
+    }
+    function render(items){
+      const rows = items.map(a=>{
+        const course = a.course_code? (a.course_code+' – '+(a.course_name||'')) : (a.course_name||'');
+        const status = statusOf(a);
+        const sched = `${fmt(a.start_at)} → ${fmt(a.due_at || a.due_date)}`;
+        return `<tr>
+          <td>${course}</td><td>${a.type||''}</td><td>${a.total_marks||0}</td><td>${sched}</td><td>${statusBadge(status)}</td>
+          <td style="text-align:right">${actionBtn(a, status)}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('rows').innerHTML = rows || '<tr><td colspan="6">No assessments found for filters.</td></tr>';
+    }
+    async function loadCourses(){
+      const r = await fetch(API+'/api/student/courses',{headers:{'X-Student-Id':studentId}});
+      const d = await r.json();
+      const list = d.items||[];
+      const sel = document.getElementById('f_course');
+      sel.innerHTML = '<option value="0">All Courses</option>' + list.map(c=>`<option value="${c.id}">${(c.code||'')+' '+(c.name||'')}</option>`).join('');
+    }
+    async function loadAssessments(){
+      try{
+        const r = await fetch(API+'/api/student/assessments',{headers:{'X-Student-Id':studentId}});
+        const d = await r.json(); if(!r.ok) throw new Error(d.error||'Failed');
+        allItems = d.items||[];
+        render(allItems);
+      }catch(e){ document.getElementById('rows').innerHTML='<tr><td colspan="6">Could not load assessments. Please try again.</td></tr>'; }
+    }
+    function viewSubmission(id){ window.location.href = `submissions.html?assessment_id=${id}`; }
+    async function attempt(id, type){
+      if((type||'').toLowerCase()==='quiz'){
+        window.location.href = `quiz.html?id=${id}&auto=1`;
+        return;
+      }
+      // Open assignment submission page (file/text)
+      window.location.href = `assignment.html?id=${id}`;
+    }
+    document.getElementById('f_course').addEventListener('change', applyFilters);
+    document.getElementById('f_date_type').addEventListener('change', applyFilters);
+    document.getElementById('f_from').addEventListener('change', applyFilters);
+    document.getElementById('f_to').addEventListener('change', applyFilters);
+    (async()=>{ await loadCourses(); await loadAssessments(); })();
+  </script>
+</body>
+</html>

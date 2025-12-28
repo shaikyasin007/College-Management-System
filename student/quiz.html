@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Take Quiz – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .q{padding:14px;border:1px solid rgba(148,163,184,.28);border-radius:12px;margin:10px 0;background:rgba(2,6,23,.45)}
+    .muted{color:#9fb0c5}
+    .btn{padding:.5rem .9rem;border-radius:10px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);color:#cbd5e1;cursor:pointer}
+    .btn.primary{background:#2563eb;border-color:#2563eb;color:#e8eefc}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px" id="title">Quiz</h2>
+      <div class="muted" id="meta">Loading...</div>
+      <div id="inst" class="muted" style="margin-top:8px"></div>
+      <div id="controls" style="display:flex;gap:12px;align-items:center;margin:10px 0">
+        <div id="timer" class="muted">--:--</div>
+        <div id="viol" class="muted">Violations: 0 / 3</div>
+        <button class="btn" id="fsBtn">Enter Full Screen</button>
+      </div>
+      <div id="warn" class="muted" style="display:none;color:#fbbf24;margin:6px 0">Warning: Violation detected.</div>
+      <div id="quiz"></div>
+      <div id="msg" class="muted" style="margin-top:8px"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn" onclick="window.history.back()">Back</button>
+        <button class="btn primary" id="submitBtn">Submit</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const role = sessionStorage.getItem('auth_role')||''; if(role !== 'student'){ window.location.href = '../login.html'; }
+    const studentId = sessionStorage.getItem('auth_user_id')||''; const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName; document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+
+    const API='http://localhost:4001';
+    const url = new URL(window.location.href);
+    const quizId = Number(url.searchParams.get('id'));
+    const quizEl = document.getElementById('quiz');
+    const msgEl = document.getElementById('msg');
+    const submitBtn = document.getElementById('submitBtn');
+    const fsBtn = document.getElementById('fsBtn');
+    const timerEl = document.getElementById('timer');
+    const violEl = document.getElementById('viol');
+    const warnEl = document.getElementById('warn');
+
+    function fmt(dt){ try{ return dt? new Date(dt).toLocaleString(): '—'; }catch{return '—';} }
+
+    let endTs = null; let tickInt = null; let violations = []; let violCount = 0; const VIOL_LIMIT=3;
+    function updateTimer(){
+      if(!endTs){ timerEl.textContent='--:--'; return; }
+      const remain = Math.max(0, Math.floor((endTs - Date.now())/1000));
+      const mm = String(Math.floor(remain/60)).padStart(2,'0');
+      const ss = String(remain%60).padStart(2,'0');
+      timerEl.textContent = `${mm}:${ss}`;
+      if(remain===0){ autoSubmit('Auto-submitted due to time up'); }
+    }
+    function incViolation(reason){
+      violCount += 1; violations.push({ ts:new Date().toISOString(), reason });
+      violEl.textContent = `Violations: ${violCount} / ${VIOL_LIMIT}`;
+      warnEl.style.display='block'; warnEl.textContent = `Warning: ${reason}`;
+      if(violCount>=VIOL_LIMIT){ autoSubmit('Auto-submitted due to violations'); }
+    }
+    function requestFullscreen(){ const el=document.documentElement; if(el.requestFullscreen) return el.requestFullscreen(); if(el.webkitRequestFullscreen) return el.webkitRequestFullscreen(); }
+    function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+
+    async function loadQuiz(){
+      if(!quizId){ msgEl.textContent = 'Invalid quiz.'; submitBtn.disabled = true; return; }
+      try{
+        const r = await fetch(API+`/api/student/quizzes/${quizId}`,{headers:{'X-Student-Id':studentId}});
+        const d = await r.json(); if(!r.ok) throw new Error(d.error||'Failed to load quiz');
+        const qz = d.quiz;
+        document.getElementById('title').textContent = qz.title || 'Quiz';
+        document.getElementById('inst').textContent = qz.instructions || '';
+        document.getElementById('meta').textContent = `${qz.course_code||''} ${qz.course_name||''} • Start: ${fmt(qz.start_at)} • End: ${fmt(qz.end_at)} • Total: ${qz.total_marks}`;
+        const now = Date.now(); const st = qz.start_at? Date.parse(qz.start_at): null; const en = qz.end_at? Date.parse(qz.end_at): null; endTs = en || null;
+        if(qz.already_submitted){
+          submitBtn.disabled = true; fsBtn.disabled = true; msgEl.textContent = 'You have already submitted this quiz.'; return;
+        }
+        if((st && now < st) || (en && now > en)){
+          submitBtn.disabled = true; msgEl.textContent = 'Quiz is not open for submission.';
+        }
+        quizEl.innerHTML = (qz.questions||[]).map(q=>{
+          const opts = (q.options||[]).map(o=>`<label style="display:block;margin:6px 0"><input type="radio" name="q_${q.id}" value="${o.id}"/> ${o.text}</label>`).join('');
+          return `<div class="q"><div><strong>Q${q.q_index}.</strong> ${q.text} <span class="muted">(${q.marks} marks)</span></div>${opts}</div>`;
+        }).join('') || '<div class="muted">No questions found.</div>';
+        if(endTs){ if(tickInt) clearInterval(tickInt); tickInt=setInterval(updateTimer, 1000); updateTimer(); }
+        // Force full-screen before enabling submit
+        submitBtn.disabled = !isFullscreen();
+      }catch(e){ msgEl.textContent = e.message || 'Failed to load quiz.'; submitBtn.disabled = true; }
+    }
+
+    function collectAnswers(){
+      const answers = [];
+      document.querySelectorAll('.q').forEach(q =>{
+        const qid = Number((q.querySelector('input[type=radio]')||{}).name?.split('_')[1]);
+        const sel = q.querySelector('input[type=radio]:checked');
+        answers.push({ question_id: qid, option_id: sel? Number(sel.value) : null });
+      });
+      return answers.filter(a=>a.question_id);
+    }
+
+    async function submitQuiz(){
+      if(!isFullscreen()){ incViolation('Attempted submit without fullscreen'); return; }
+      const ans = collectAnswers();
+      if(!ans.length){ alert('Please answer at least one question.'); return; }
+      try{
+        const r = await fetch(API+`/api/student/quizzes/${quizId}/submit`,{method:'POST',headers:{'Content-Type':'application/json','X-Student-Id':studentId},body:JSON.stringify({answers:ans, violation_count: violCount, violations})});
+        const d = await r.json();
+        if(!r.ok){ alert(d.error||'Submission failed'); return; }
+        alert(`Submitted. Score: ${d.total_obtained}`);
+        window.location.href = 'assessments.html';
+      }catch(e){ alert('Network error'); }
+    }
+
+    submitBtn.addEventListener('click', submitQuiz);
+    fsBtn.addEventListener('click', async ()=>{ try{ await requestFullscreen(); }catch(e){ msgEl.textContent='Full-screen is required to start the quiz.'; } submitBtn.disabled = !isFullscreen(); });
+    document.addEventListener('fullscreenchange', ()=>{ if(!isFullscreen()){ incViolation('Exited full screen'); } submitBtn.disabled = !isFullscreen(); });
+    document.addEventListener('visibilitychange', ()=>{ if(document.hidden) incViolation('Switched tab or minimized'); });
+    window.addEventListener('blur', ()=>{ incViolation('Switched application or window'); });
+    window.addEventListener('keydown', (e)=>{
+      if((e.ctrlKey||e.metaKey) && (e.key==='c' || e.key==='v')){ incViolation(e.key==='c'?'Copy action':'Paste action'); }
+      if(e.key==='F12'){ incViolation('Developer tools'); }
+    });
+    async function autoSubmit(reason){
+      const ans = collectAnswers();
+      try{
+        await fetch(API+`/api/student/quizzes/${quizId}/submit`,{method:'POST',headers:{'Content-Type':'application/json','X-Student-Id':studentId},body:JSON.stringify({answers:ans, violation_count: violCount, violations, auto_submit_reason: reason})});
+      }catch(_){ /* ignore */ }
+      alert('Quiz auto-submitted. ' + reason);
+      window.location.href = 'assessments.html';
+    }
+    loadQuiz();
+    // Auto full-screen if requested
+    (async()=>{
+      const auto = url.searchParams.get('auto');
+      if(auto==='1'){
+        try{ await requestFullscreen(); submitBtn.disabled = !isFullscreen(); }
+        catch(e){ msgEl.textContent='Could not enter full-screen. Please click Enter Full Screen to start.'; submitBtn.disabled = true; }
+      }
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student · Announcements – Heema Institute of Technology</title>
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    :root{--bg1:#0b1220;--bg2:#0a1b2e}
+    body{margin:0;background:linear-gradient(180deg,var(--bg2),var(--bg1));color:#e7e9f3}
+    .nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(180deg, rgba(10,20,40,.95), rgba(10,20,40,.85));border-bottom:1px solid rgba(148,163,184,.2);backdrop-filter:blur(10px);z-index:10}
+    .nav-inner{max-width:1160px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between}
+    .nav-left strong{display:block;color:#e8eefc;font-size:16px}
+    .nav-left .nav-sub{color:#9fb0c5;font-size:12px}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .id-chip{padding:4px 10px;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:rgba(15,23,42,.6);font-size:12px;color:#cbd5e1}
+    main{padding-top:76px}
+    .wrap{width:min(1160px,96%);margin:0 auto 40px}
+    .card{border:1px solid rgba(148,163,184,.28);border-radius:18px;padding:18px;background:linear-gradient(180deg, rgba(2,6,23,.86), rgba(2,6,23,.72));backdrop-filter:blur(12px);box-shadow:0 24px 60px rgba(2,6,23,.55)}
+    .list{margin:0;padding:0}
+    .list li{list-style:none;margin:8px 0;padding:10px 12px;border:1px solid rgba(148,163,184,.28);background:rgba(2,6,23,.45);border-radius:12px;font-size:13px;color:#dbe2f9}
+    .muted{color:#94a3b8;font-size:12px}
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <strong>Heema Institute of Technology</strong>
+        <div class="nav-sub">Student Console</div>
+      </div>
+      <div class="nav-right">
+        <div id="hdr_name">—</div>
+        <div class="id-chip" id="hdr_id">ID: —</div>
+        <button class="btn btn-outline" onclick="Auth.logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 8px">Announcements</h2>
+      <ul class="list" id="rows"><li class="muted">Loading...</li></ul>
+    </section>
+  </main>
+
+  <script src="../auth.js"></script>
+  <script>
+    const role = sessionStorage.getItem('auth_role')||''; if(role !== 'student'){ window.location.href = '../login.html'; }
+    const studentId = sessionStorage.getItem('auth_user_id')||''; const studentName = sessionStorage.getItem('auth_name')||'Student';
+    document.getElementById('hdr_name').textContent = studentName; document.getElementById('hdr_id').textContent = 'ID: ' + (studentId||'—');
+    const API='http://localhost:4001';
+    function fmt(dt){ try{ return dt? new Date(dt).toLocaleString(): '—'; }catch{return '—';} }
+    async function load(){
+      try{
+        const r = await fetch(API+'/api/student/announcements',{headers:{'X-Student-Id':studentId}}); const d = await r.json();
+        const rows = (d.items||[]).map(a=>`<li><strong>${a.title||'Notice'}</strong><div class="muted">${fmt(a.created_at)}</div><div>${a.body||''}</div></li>`).join('');
+        document.getElementById('rows').innerHTML = rows || '<li class="muted">No announcements.</li>';
+      }catch(e){ document.getElementById('rows').innerHTML = '<li class="muted">Failed to load.</li>'; }
+    }
+    load();
+  </script>
+</body>
+</html>
