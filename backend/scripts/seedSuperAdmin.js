@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
 
 (async () => {
